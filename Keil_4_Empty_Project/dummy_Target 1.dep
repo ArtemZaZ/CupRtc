@@ -14,9 +14,9 @@ I (C:\Keil\ARM\ARMCC\bin\..\include\stdint.h)(0x50F9A7A0)
 I (.\src\CMSIS\core_cmInstr.h)(0x5122091C)
 I (.\src\CMSIS\core_cmFunc.h)(0x5122091C)
 I (src\CMSIS/system_stm32f10x.h)(0x4D7882FA)
-I (src\SPEEXPARSER/conspeex.h)(0x5A6B16D4)
+I (src\SPEEXPARSER/conspeex.h)(0x5A6B113B)
 F (.\src\SPEEXPARSER\conspeex.c)(0x5A6B1674)(-c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork -I.\src\CMSIS --c99 -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\ST\STM32F10x -o ".\obj\conspeex.o" --omf_browse ".\obj\conspeex.crf" --depend ".\obj\conspeex.d")
-I (src\SPEEXPARSER\conspeex.h)(0x5A6B16D4)
+I (src\SPEEXPARSER\conspeex.h)(0x5A6B113B)
 I (C:\Keil\ARM\ARMCC\bin\..\include\stdint.h)(0x50F9A7A0)
 I (C:\Keil\ARM\ARMCC\bin\..\include\stdio.h)(0x50F9A7A0)
 I (C:\Keil\ARM\ARMCC\bin\..\include\stdlib.h)(0x50F9A7A0)

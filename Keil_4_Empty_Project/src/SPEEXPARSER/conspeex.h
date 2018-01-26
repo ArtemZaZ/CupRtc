@@ -52,10 +52,10 @@ typedef struct{
  * Для комманды BLOCK хранит общее количество блоков
 */
 
-uint8_t convertSymbolToNumber(char sym);				// Переводит символ в число
-uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Format format); // переводит строку в число, ret - указатель на область памяти, где хранится число
-Command commandDefiner(char *str);							// Возвращает команду, которая записана в строке. str - указатель на начало комманды 
-uint16_t calcrc(char *ptr, uint8_t count);		  // вычисление хеш-суммы crc16Xmodem
+static uint8_t convertSymbolToNumber(char sym);				// Переводит символ в число
+static uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Format format); // переводит строку в число, ret - указатель на область памяти, где хранится число
+static Command commandDefiner(char *str);							// Возвращает команду, которая записана в строке. str - указатель на начало комманды 
+static uint16_t calcrc(char *ptr, uint8_t count);		  // вычисление хеш-суммы crc16Xmodem
 RecData parsing(char* str, uint8_t size);			  // парсер строки данных
 
 
