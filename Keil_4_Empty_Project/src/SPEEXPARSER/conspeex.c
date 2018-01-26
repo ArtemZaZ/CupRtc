@@ -13,14 +13,14 @@
 
 uint8_t buffer[BUFLEN];
 
-uint8_t convertSymbolToNumber(char sym)			// перевод символа(шестнадцатиричного(Только верхний регистр)), в число
+static uint8_t convertSymbolToNumber(char sym)			// перевод символа(шестнадцатиричного(Только верхний регистр)), в число
 {
 	if((sym>=(uint8_t)'0')&&(sym<=(uint8_t)'9')) return (uint8_t)sym - (uint8_t)'0';					// Для цифр
 	if((sym>=(uint8_t)'A')&&(sym<=(uint8_t)'F')) return ((uint8_t)sym - (uint8_t)'A') + 10;		// для букв
 	else return 0;																																						// 
 }
 
-uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Format format)					// Переводит шестнадцатиричную символьную строку в числовую строку и записывает ее в область памяти, на которую указывает ret 
+static uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Format format)					// Переводит шестнадцатиричную символьную строку в числовую строку и записывает ее в область памяти, на которую указывает ret 
 {
 	switch(format)
 	{
@@ -43,7 +43,7 @@ uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Format form
 	}
 }
 
-Command commandDefiner(char *str)						// str - указатель на начало комманды 
+static Command commandDefiner(char *str)						// str - указатель на начало комманды 
 {
 	if(strncmp(str, "STATE", 5) == 0) return STATE;	
 	if(strncmp(str, "TEXT1", 5) == 0) return TEXT1;
@@ -67,7 +67,7 @@ Command commandDefiner(char *str)						// str - указатель на нача
 	return ERR;
 }
 
-uint16_t calcrc(char *ptr, uint8_t count)   // вычисление хеш-суммы crc16Xmodem(выцеплена из какой-то либы)
+static uint16_t calcrc(char *ptr, uint8_t count)   // вычисление хеш-суммы crc16Xmodem(выцеплена из какой-то либы)
 {
 	uint16_t crc;
 	uint8_t i;
