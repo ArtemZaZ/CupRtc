@@ -1,20 +1,22 @@
 #include "CMSIS/stm32f10x.h"
-#include <stdint.h>
-#include <stdbool.h>
 #include "SPEEXPARSER/conspeex.h"
-
-uint64_t temp = 0;
-uint8_t buffer[100];
+#include <stdint.h>
 
 
-int main(void)       		//В функции main поочередно присвойте каждой из целочисленных переменных следующие значения:        
-{											
-	//ConvertStringToNumber((uint8_t*)"FABC1270", buffer, 8, LITTLEN);
-	//temp = *(uint64_t*)buffer;
-	//temp = ui8ncmp((uint8_t*)"AVCSa", (uint8_t*)"AVCSb", 5);
-	Comand a = ComandDefiner((uint8_t*)"BLOCK");
-	temp = (uint8_t)a;
-											 
+RecData temp;
+
+int main(void)
+{
+	
+	
+	char *data0 = "<STATE 01 23E7>";
+	char *data1 = "<TEXT2 &Hello World& 992A>                 ";
+	char *data2 = "<SPEEX 0049 000739CE1E9D66000039CE70001CE738000E739C 36FD>                                                              ";
+	char *data3 = "<BLOCK 0161 573D>                         ";
+	
+	
+	temp = parsing(data2, 100);
+
 	while(1)
 	{
 		;		
