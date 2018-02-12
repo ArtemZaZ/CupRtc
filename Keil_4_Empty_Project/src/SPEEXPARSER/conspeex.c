@@ -45,6 +45,13 @@ static uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Form
 
 static Command commandDefiner(char *str)						// str - указатель на начало комманды 
 {
+	if(strncmp(str, "TEXT10", 6) == 0) return TEXT10;
+	if(strncmp(str, "TEXT11", 6) == 0) return TEXT11;
+	if(strncmp(str, "TEXT12", 6) == 0) return TEXT12;
+	if(strncmp(str, "TEXT13", 6) == 0) return TEXT13;
+	if(strncmp(str, "TEXT14", 6) == 0) return TEXT14;
+	if(strncmp(str, "TEXT15", 6) == 0) return TEXT15;
+	if(strncmp(str, "TEXT16", 6) == 0) return TEXT16;
 	if(strncmp(str, "STATE", 5) == 0) return STATE;	
 	if(strncmp(str, "TEXT1", 5) == 0) return TEXT1;
 	if(strncmp(str, "TEXT2", 5) == 0) return TEXT2;
@@ -55,13 +62,6 @@ static Command commandDefiner(char *str)						// str - указатель на �
 	if(strncmp(str, "TEXT7", 5) == 0) return TEXT7;
 	if(strncmp(str, "TEXT8", 5) == 0) return TEXT8;
 	if(strncmp(str, "TEXT9", 5) == 0) return TEXT9;
-	if(strncmp(str, "TEXT10", 6) == 0) return TEXT10;
-	if(strncmp(str, "TEXT11", 6) == 0) return TEXT11;
-	if(strncmp(str, "TEXT12", 6) == 0) return TEXT12;
-	if(strncmp(str, "TEXT13", 6) == 0) return TEXT13;
-	if(strncmp(str, "TEXT14", 6) == 0) return TEXT14;
-	if(strncmp(str, "TEXT15", 6) == 0) return TEXT15;
-	if(strncmp(str, "TEXT16", 6) == 0) return TEXT16;
 	if(strncmp(str, "BLOCK", 5) == 0) return BLOCK;
 	if(strncmp(str, "SPEEX", 5) == 0)	return SPEEX;	
 	return ERR;
@@ -152,7 +152,7 @@ RecData parsing(char* str, uint8_t size)
 			token = strtok(NULL, " ");											// второй токен - данные
 			convertStringToNumber(token, ret.data, 40, BIGEN);					// переводим спиксовые данные и записываем их сразу в память
 			strncpy((char*)tempBuffer, tempToken, 4);				// хеш считается по номеру блока + данные
-			tempBuffer[5] = '\0';														// strncat дописывает строку вместо символа конца строки
+			tempBuffer[4] = '\0';														// strncat дописывает строку вместо символа конца строки
 			strncat((char*)tempBuffer, token, 40);					// 
 			hesh = calcrc((char*)tempBuffer, 44);
 			token = strtok(NULL, " >");			
