@@ -45,25 +45,30 @@ static uint8_t convertStringToNumber(char* str, uint8_t* ret, uint8_t size, Form
 
 static Command commandDefiner(char *str)						// str - указатель на начало комманды 
 {
-	if(strncmp(str, "TEXT10", 6) == 0) return TEXT10;
-	if(strncmp(str, "TEXT11", 6) == 0) return TEXT11;
-	if(strncmp(str, "TEXT12", 6) == 0) return TEXT12;
-	if(strncmp(str, "TEXT13", 6) == 0) return TEXT13;
-	if(strncmp(str, "TEXT14", 6) == 0) return TEXT14;
-	if(strncmp(str, "TEXT15", 6) == 0) return TEXT15;
-	if(strncmp(str, "TEXT16", 6) == 0) return TEXT16;
-	if(strncmp(str, "STATE", 5) == 0) return STATE;	
-	if(strncmp(str, "TEXT1", 5) == 0) return TEXT1;
-	if(strncmp(str, "TEXT2", 5) == 0) return TEXT2;
-	if(strncmp(str, "TEXT3", 5) == 0) return TEXT3;
-	if(strncmp(str, "TEXT4", 5) == 0) return TEXT4;
-	if(strncmp(str, "TEXT5", 5) == 0) return TEXT5;
-	if(strncmp(str, "TEXT6", 5) == 0) return TEXT6;
-	if(strncmp(str, "TEXT7", 5) == 0) return TEXT7;
-	if(strncmp(str, "TEXT8", 5) == 0) return TEXT8;
-	if(strncmp(str, "TEXT9", 5) == 0) return TEXT9;
-	if(strncmp(str, "BLOCK", 5) == 0) return BLOCK;
-	if(strncmp(str, "SPEEX", 5) == 0)	return SPEEX;	
+	if(!strncmp(str, "SPEEX", 5))	return SPEEX;
+	if(!strncmp(str, "STATE", 5)) return STATE;
+	if(!strncmp(str, "BLOCK", 5)) return BLOCK;
+	if(!strncmp(str, "TEXT", 4))
+	{
+	  str = str + 4;
+		if(!strncmp(str, "10", 2)) return TEXT10;
+		if(!strncmp(str, "11", 2)) return TEXT11;
+		if(!strncmp(str, "12", 2)) return TEXT12;
+		if(!strncmp(str, "13", 2)) return TEXT13;
+		if(!strncmp(str, "14", 2)) return TEXT14;
+		if(!strncmp(str, "15", 2)) return TEXT15;
+		if(!strncmp(str, "16", 2)) return TEXT16;			
+		if(!strncmp(str, "1", 1)) return TEXT1;
+		if(!strncmp(str, "2", 1)) return TEXT2;
+		if(!strncmp(str, "3", 1)) return TEXT3;
+		if(!strncmp(str, "4", 1)) return TEXT4;
+		if(!strncmp(str, "5", 1)) return TEXT5;
+		if(!strncmp(str, "6", 1)) return TEXT6;
+		if(!strncmp(str, "7", 1)) return TEXT7;
+		if(!strncmp(str, "8", 1)) return TEXT8;
+		if(!strncmp(str, "9", 1)) return TEXT9;
+	}
+	
 	return ERR;
 }
 
