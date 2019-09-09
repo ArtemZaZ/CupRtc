@@ -5,34 +5,46 @@ import json
 from urtx.urtxserial import SerialUrtx
 import sys
 import getopt
+import textwrap
+import threading
 
-configFilePath = None
-speexFilePath = None
+configFilePath = None       # путь до файла конфигурации
+speexFilePath = None        # путь до speex файла
+speexFileHeadSize = 160     # размер заголовка спиксового файла в байтах
+portPath = "/dev/ttyUSB0"   # порт и
+baud = 9600                 # боды по умолчанию
 
+""" чтение опций с коммандной строки """
 try:
-    opts, _ = getopt.getopt(sys.argv[1:], "hc:s:", ["help", "configfile=", "speexfile="])
+    opts, _ = getopt.getopt(sys.argv[1:], "hc:s:p:b:", ["help", "configfile=", "speexfile=", "port=", "baudrate="])
     for opt, arg in opts:
         if (opt == '-h') or (opt == "--help"):
-            print("Используйте: \n", sys.argv[0] + """ -c <configfilepath> -s <speexfilepath>"""
-                                                """ --configfile=<configfilepath> --speexfile=<speexfilepath>""")
+            print("Используйте: \n", sys.argv[0] + """ -c <configfilepath> -s <speexfilepath> \n\t -p <port> -b <baudrate> \n\t"""
+                                                   """ --configfile=<configfilepath> --speexfile=<speexfilepath> \n\t"""
+                                                   """ --port=<port> --baudrate=<baudrate>""")
             sys.exit(0)
-        if (opt == '-c') or (opt == "--configfile"):
+        elif (opt == '-c') or (opt == "--configfile"):
             configFilePath = arg
-        if (opt == '-s') or (opt == "--speexfile"):
+        elif (opt == '-s') or (opt == "--speexfile"):
             speexFilePath = arg
+        elif (opt == '-p') or (opt == "--port"):
+            portPath = arg
+        elif (opt == '-b') or (opt == "--baudrate"):
+            baud = arg
 except getopt.GetoptError:
     print("Используйте: \n", sys.argv[0] + " --help")
     sys.exit(2)
 
 if configFilePath is None:
-    print("Не был указан конфигурационный файл, используйте: \n ", sys.argv[0] + " -c <configfilepath> -s <speexfilepath>")
+    print("Не был указан конфигурационный файл, используйте: \n ",
+          sys.argv[0] + " -c <configfilepath> -s <speexfilepath>")
     sys.exit(2)
 
 if speexFilePath is None:
     print("Не был указан speex файл, используйте: \n", sys.argv[0] + " -c <configfilepath> -s <speexfilepath>")
     sys.exit(2)
 
-
+""" Проверка наличия файлов """
 data = {}
 try:
     with open(configFilePath, "r") as file:
@@ -43,31 +55,55 @@ except FileNotFoundError:
 
 try:
     with open(speexFilePath, 'r') as file:
+        file.seek(speexFileHeadSize)
         data.update({"speex": file.read()})
 except FileNotFoundError:
     print(speexFilePath, ": такого файла не найдено")
     sys.exit(2)
 
+
 ser = SerialUrtx()
 
-
-def recvBlock(data):
-    print("block", data)
-
-
-def recvError(data):
-    print("error", data)
+ack = threading.Event()     # блокировщик основного потока
+ackCode = None      # код ошибки, приходящий с платы
 
 
-ser.subscribe(3, recvBlock)
-ser.subscribe(5, recvError)
-ser.connect("/dev/ttyUSB1", 9600)
+def loadPackage(desc, data):
+    """ загружает данные, пока не придет подтверждение с платы """
+    global ackCode
+    while True:
+        ser.sendPackage(desc, data)     # отправляем пакет и ждем
+        ack.wait()  # ждем, пока не придет ответ
+        ack.clear()     # снимаем флаг
+        if ackCode == 0:    # если пришел 0 - сообщение доставлено
+            break
+        elif ackCode == 1:  # если пришла 1 - сообщение не доставлено
+            continue
+
+
+def recvFeedBack(data):
+    """ обратная связь с платы  """
+    global ackCode
+    ackCode = data[0]
+    ack.set()
+
+
+def splitSpeex(s, tokensize=20):
+    """ разбиваем строку на токены по 20 символов, лишнее выбрасываем """
+    return list(map(''.join, zip(*[iter(s)]*tokensize)))
+
+
+ser.subscribe(4, recvFeedBack)      # подключаемся к обработчику
+ser.connect(portPath, baud)   # подключаемся к порту
 ser.start()
 
 if data.get("state"):
-    ser.sendPackage(1, (data["state"],))
+    print("state send...")
+    loadPackage(1, (data["state"],))
+    print("done!")
 
 if data.get("texts"):
+    print("texts send...")
     for idx, text in enumerate(data["texts"]):
         btext = bytearray(text, "utf-8")
         if len(btext) > 20:
@@ -75,13 +111,15 @@ if data.get("texts"):
         else:
             btext = btext + b'\n'
             btext = btext.ljust(21, b'\x00')
-            ser.sendPackage(2, bytes([idx]) + btext)
+            loadPackage(2, bytes([idx]) + btext)
+    print("done!")
 
-# ser.sendPackage(0, (1,))
-# ser.sendPackage(1, (2,))
-# ser.sendPackage(2, bytes([21]) + b"123456789!123456789!")
-# ser.sendPackage(3, (333,))
-# ser.sendPackage(4, b"90909090909090909090")
-# ser.sendPackage(5, (3,))
+data["speex"] = splitSpeex(data["speex"], tokensize=20)
 
-time.sleep(3)
+print("speex send...")
+for token in data["speex"]:
+    loadPackage(3, bytes(token, encoding="utf-8"))
+print("done!")
+
+time.sleep(1)
+ser.exit()

@@ -36,6 +36,7 @@ class SerialUrtx(threading.Thread):
     def exit(self):
         """ метод выхода из потока """
         self.__exit = True
+        self.disconnect()
 
     def _readArray(self, size):
         """ метод чтения массива данных """
