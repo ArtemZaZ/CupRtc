@@ -5,18 +5,19 @@ import json
 from urtx.urtxserial import SerialUrtx
 import sys
 import getopt
-import textwrap
 import threading
 
-configFilePath = None       # путь до файла конфигурации
-speexFilePath = None        # путь до speex файла
+configFilePath = 'conf.json'       # путь до файла конфигурации
+speexFilePath = 'test.speex'        # путь до speex файла
 speexFileHeadSize = 160     # размер заголовка спиксового файла в байтах
-portPath = "/dev/ttyUSB0"   # порт и
+portPath = "COM4"   # порт и
 baud = 9600                 # боды по умолчанию
+textCodec = "utf-8"
+speexCodec = "utf-8"
 
 """ чтение опций с коммандной строки """
 try:
-    opts, _ = getopt.getopt(sys.argv[1:], "hc:s:p:b:", ["help", "configfile=", "speexfile=", "port=", "baudrate="])
+    opts, _ = getopt.getopt(sys.argv[1:], "hc:s:p:b:t:", ["help", "configfile=", "speexfile=", "port=", "baudrate=", "textcodec="])
     for opt, arg in opts:
         if (opt == '-h') or (opt == "--help"):
             print("Используйте: \n", sys.argv[0] + """ -c <configfilepath> -s <speexfilepath> \n\t -p <port> -b <baudrate> \n\t"""
@@ -30,6 +31,8 @@ try:
         elif (opt == '-p') or (opt == "--port"):
             portPath = arg
         elif (opt == '-b') or (opt == "--baudrate"):
+            baud = arg
+        elif (opt == '-t') or (opt == "--textcodec"):
             baud = arg
 except getopt.GetoptError:
     print("Используйте: \n", sys.argv[0] + " --help")
@@ -105,9 +108,9 @@ if data.get("state"):
 if data.get("texts"):
     print("texts send...")
     for idx, text in enumerate(data["texts"]):
-        btext = bytearray(text, "utf-8")
+        btext = bytearray(text, textCodec)
         if len(btext) > 20:
-            raise ValueError("длина строки не должна превышать 20 символов латиницы или 10 символов кириллицы")
+            raise ValueError("Длина строки: " + text + "слишком большая")
         else:
             btext = btext + b'\n'
             btext = btext.ljust(21, b'\x00')
@@ -118,7 +121,7 @@ data["speex"] = splitSpeex(data["speex"], tokensize=20)
 
 print("speex send...")
 for token in data["speex"]:
-    loadPackage(3, bytes(token, encoding="utf-8"))
+    loadPackage(3, bytes(token, encoding=speexCodec))
 print("done!")
 
 time.sleep(1)
