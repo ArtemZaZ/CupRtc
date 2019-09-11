@@ -6,24 +6,24 @@
 
 typedef struct
 {
-    uint16_t checksum;  // избыточный код
-    uint8_t descriptor;       // дескриптор пакета
-    uint8_t state;      // место участника
+  uint16_t checksum;  // избыточный код
+  uint8_t descriptor;       // дескриптор пакета
+  uint8_t state;      // место участника
 } StatePackage;
 
 typedef struct
 {
-    uint16_t checksum;  // избыточный код
-    uint8_t descriptor;       // дескриптор пакета
-    uint8_t textnum;    // номер текста
-    uint8_t text[MAX_TEXT_SIZE];   // сам текст, в конце нуль-терминальная строка
+  uint16_t checksum;  // избыточный код
+  uint8_t descriptor;       // дескриптор пакета
+  uint8_t textnum;    // номер текста
+  uint8_t text[MAX_TEXT_SIZE];   // сам текст, в конце нуль-терминальная строка
 } TextPackage;
 
 typedef struct
 {
-    uint16_t checksum;  // избыточный код
-    uint8_t descriptor;       // дескриптор пакета
-    uint8_t data[SPEEX_BLOCK_SIZE];   // speex данные
+  uint16_t checksum;  // избыточный код
+  uint8_t descriptor;       // дескриптор пакета
+  uint8_t data[SPEEX_BLOCK_SIZE];   // speex данные
 } SpeexPackage;
 
 
