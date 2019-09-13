@@ -48,7 +48,7 @@ static uint16_t crc16Xmodem(uint8_t* ptr, uint8_t count)    // получени�
   return (crc);
 }
 
-uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, TextPackage* text, SpeexPackage* speex)
+uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, TextPackage* text, SpeexPackage* speex, FeedbackPackage* fb)
 {
   static uint8_t recvBuffer[RECV_BUFFER_LEN];     // буффер в который читается пакет
   uint8_t* recvBufferCounter = recvBuffer;    // каретка
@@ -81,7 +81,6 @@ uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, Text
   if(getSizeByDesc(descriptor) == 0) return 0; // ошибка - неизвестный дескриптор
   
   readArrayFun(recvBufferCounter, getSizeByDesc(descriptor));
-  uint16_t temp = crc16Xmodem(recvBufferCounter, getSizeByDesc(descriptor));
   if(crc16Xmodem(recvBufferCounter, getSizeByDesc(descriptor)) != checksum) return 0; // ошибка избыточного кода
   
   switch(descriptor)
@@ -102,8 +101,15 @@ uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, Text
       
     case 3:
       speex->descriptor = descriptor;
+			speex->checksum = checksum;
       strncpy((char*)(speex->data), (char*)recvBufferCounter, SPEEX_BLOCK_SIZE);
       break;
+		
+		case 4:
+			fb->descriptor = descriptor;
+			fb->checksum = checksum;
+			fb->code = *recvBufferCounter;
+			break;
     
     default:    // неизвестный дескриптор
       return 0;
@@ -115,22 +121,24 @@ void sendFeedback(void (*sendArrayFunc)(uint8_t*, uint32_t), uint8_t code)
 {
   static uint8_t sendBuffer[SEND_BUFFER_LEN];
   uint8_t* sendBufferCounter = sendBuffer;
-  uint16_t checksum = 0;
-  uint8_t descriptor = 4;
   
-  checksum = crc16Xmodem((uint8_t*)&code, 1);
+	FeedbackPackage fb;
+	fb.descriptor = 4;
+	fb.code = code;
+  
+  fb.checksum = crc16Xmodem((uint8_t*)&code, 1);
   
   *((uint16_t*)sendBufferCounter) = (uint16_t)START_BYTES;
   sendBufferCounter = sendBufferCounter + 2;
   
-  *((uint16_t*)sendBufferCounter) = checksum;
+  *((uint16_t*)sendBufferCounter) = fb.checksum;
   sendBufferCounter = sendBufferCounter + 2;
   
-  *sendBufferCounter = descriptor;
+  *sendBufferCounter = fb.descriptor;
   sendBufferCounter++;
   
-  *sendBufferCounter = code;
+  *sendBufferCounter = fb.code;
   
-  sendArrayFunc(sendBuffer, 2 + HEAD_SIZE + getSizeByDesc(descriptor));
+  sendArrayFunc(sendBuffer, 2 + HEAD_SIZE + getSizeByDesc(fb.descriptor));
 } 
 

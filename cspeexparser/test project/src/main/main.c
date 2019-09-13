@@ -8,6 +8,7 @@
 StatePackage statePackage;
 TextPackage textPackage;
 SpeexPackage speexPackage;
+FeedbackPackage fbPackage;
 
 void readArr(uint8_t* out, uint32_t size)
 {
@@ -30,9 +31,10 @@ void sendArr(uint8_t* in, uint32_t size)
 int main (void)
 {
   uart::uart1.init(uart::Pins::UART1_PA9_PA10, 9600);   // инициализация физ интерфейса  
+	sendFeedback(sendArr, 1);		// переотправляется предыдущий пакет (если скрипт был запущен раньше, чем плата начала принимать пакеты)
   while(1)
   {
-    uint8_t desc = recv(readArr, &statePackage, &textPackage, &speexPackage);  
+    uint8_t desc = recv(readArr, &statePackage, &textPackage, &speexPackage, &fbPackage);  
     switch(desc)
     {
       case 1:
@@ -49,7 +51,12 @@ int main (void)
         // работа с блоком speex: speexPackage.data
         sendFeedback(sendArr, 0);
         break;
-        
+			
+			case 4:
+				// работа с обратной связью(сюда придет собщение об окончании связи)
+				sendFeedback(sendArr, 0);	
+				break;
+			
       default:        
         sendFeedback(sendArr, 1);
         break;

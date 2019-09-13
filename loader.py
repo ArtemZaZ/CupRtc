@@ -124,5 +124,8 @@ for token in data["speex"]:
     loadPackage(3, bytes(token, encoding=speexCodec))
 print("done!")
 
+print("waiting disconnection...")
+loadPackage(4, (0, ))   # сообщение об окончании связи
+print("done!")
 time.sleep(1)
 ser.exit()
