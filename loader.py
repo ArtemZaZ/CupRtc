@@ -93,7 +93,7 @@ def recvFeedBack(data):
 
 def splitSpeex(s, tokensize=20):
     """ разбиваем строку на токены по 20 символов, лишнее выбрасываем """
-    return list(map(''.join, zip(*[iter(s)]*tokensize)))
+    return list(map(lambda a: bytes(a), zip(*[iter(s)]*tokensize)))
 
 
 ser.subscribe(4, recvFeedBack)      # подключаемся к обработчику
@@ -121,7 +121,7 @@ data["speex"] = splitSpeex(data["speex"], tokensize=20)
 
 print("speex send...")
 for token in data["speex"]:
-    loadPackage(3, bytes(token, encoding=speexCodec))
+    loadPackage(3, token)
 print("done!")
 
 print("waiting disconnection...")
