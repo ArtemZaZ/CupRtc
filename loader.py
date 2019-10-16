@@ -50,14 +50,14 @@ if speexFilePath is None:
 """ Проверка наличия файлов """
 data = {}
 try:
-    with open(configFilePath, "r") as file:
+    with open(configFilePath, "r", encoding='utf-8') as file:
         data.update(json.load(file))
 except FileNotFoundError:
     print(configFilePath, ": такого файла не найдено")
     sys.exit(2)
 
 try:
-    with open(speexFilePath, 'r') as file:
+    with open(speexFilePath, 'r', encoding='utf-8') as file:
         file.seek(speexFileHeadSize)
         data.update({"speex": file.read()})
 except FileNotFoundError:
