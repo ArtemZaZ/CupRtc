@@ -57,7 +57,7 @@ except FileNotFoundError:
     sys.exit(2)
 
 try:
-    with open(speexFilePath, 'r', encoding='utf-8') as file:
+    with open(speexFilePath, 'rb') as file:
         file.seek(speexFileHeadSize)
         data.update({"speex": file.read()})
 except FileNotFoundError:
