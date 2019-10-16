@@ -6,6 +6,7 @@ from urtx.urtxserial import SerialUrtx
 import sys
 import getopt
 import threading
+import tqdm
 
 configFilePath = 'conf.json'       # путь до файла конфигурации
 speexFilePath = 'test.speex'        # путь до speex файла
@@ -13,7 +14,7 @@ speexFileHeadSize = 160     # размер заголовка спиксовог
 portPath = "COM4"   # порт и
 baud = 9600                 # боды по умолчанию
 textCodec = "utf-8"
-speexCodec = "utf-8"
+
 
 """ чтение опций с коммандной строки """
 try:
@@ -101,12 +102,17 @@ ser.connect(portPath, baud)   # подключаемся к порту
 ser.start()
 
 if data.get("state"):
-    print("state send...")
+    print("\nstate send...")
+    time.sleep(0.1)
+    pbar = tqdm.tqdm(total=1)
     loadPackage(1, (data["state"],))
-    print("done!")
+    pbar.update(1)
+    pbar.close()
 
 if data.get("texts"):
-    print("texts send...")
+    print("\ntexts send...")
+    time.sleep(0.1)
+    pbar = tqdm.tqdm(total=len(data["texts"]))
     for idx, text in enumerate(data["texts"]):
         btext = bytearray(text, textCodec)
         if len(btext) > 20:
@@ -115,16 +121,21 @@ if data.get("texts"):
             btext = btext + b'\n'
             btext = btext.ljust(21, b'\x00')
             loadPackage(2, bytes([idx]) + btext)
-    print("done!")
+            pbar.update(1)
+    pbar.close()
 
 data["speex"] = splitSpeex(data["speex"], tokensize=20)
 
-print("speex send...")
+print("\nspeex send...")
+time.sleep(0.1)
+pbar = tqdm.tqdm(total=len(data["speex"]))
 for token in data["speex"]:
     loadPackage(3, token)
-print("done!")
+    pbar.update(1)
 
-print("waiting disconnection...")
+pbar.close()
+
+print("\nwaiting disconnection...")
 loadPackage(4, (0, ))   # сообщение об окончании связи
 print("done!")
 time.sleep(1)
