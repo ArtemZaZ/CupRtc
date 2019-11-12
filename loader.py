@@ -116,11 +116,11 @@ if data.get("texts"):
     pbar = tqdm.tqdm(total=len(data["texts"]))
     for idx, text in enumerate(data["texts"]):
         btext = lcdcodec.lcdDecode(text)
-        if len(btext) > 49:
+        if len(btext) > 99:
             raise ValueError("Длина строки: " + text + "слишком большая")
         else:
             btext = btext + b'\n'
-            btext = btext.ljust(50, b'\x00')
+            btext = btext.ljust(100, b'\x00')
             loadPackage(2, bytes([idx]) + btext)
             pbar.update(1)
     pbar.close()
