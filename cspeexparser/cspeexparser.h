@@ -1,6 +1,6 @@
 #pragma once
 #include "stdint.h"
-#define MAX_TEXT_SIZE       21
+#define MAX_TEXT_SIZE       50
 #define SPEEX_BLOCK_SIZE    20
 
 
