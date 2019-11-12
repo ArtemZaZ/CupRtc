@@ -3,6 +3,7 @@
 import time
 import json
 from urtx.urtxserial import SerialUrtx
+import lcdcodec
 import sys
 import getopt
 import threading
@@ -114,12 +115,12 @@ if data.get("texts"):
     time.sleep(0.1)
     pbar = tqdm.tqdm(total=len(data["texts"]))
     for idx, text in enumerate(data["texts"]):
-        btext = bytearray(text, textCodec)
-        if len(btext) > 20:
+        btext = lcdcodec.lcdDecode(text)
+        if len(btext) > 49:
             raise ValueError("Длина строки: " + text + "слишком большая")
         else:
             btext = btext + b'\n'
-            btext = btext.ljust(21, b'\x00')
+            btext = btext.ljust(50, b'\x00')
             loadPackage(2, bytes([idx]) + btext)
             pbar.update(1)
     pbar.close()
