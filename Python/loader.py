@@ -102,14 +102,6 @@ ser.subscribe(4, recvFeedBack)      # подключаемся к обработ
 ser.connect(portPath, baud)   # подключаемся к порту
 ser.start()
 
-if data.get("state"):
-    print("\nstate send...")
-    time.sleep(0.1)
-    pbar = tqdm.tqdm(total=1)
-    loadPackage(1, (data["state"],))
-    pbar.update(1)
-    pbar.close()
-
 if data.get("texts"):
     print("\ntexts send...")
     time.sleep(0.1)
@@ -129,11 +121,21 @@ data["speex"] = splitSpeex(data["speex"], tokensize=20)
 
 print("\nspeex send...")
 time.sleep(0.1)
+count = 0
 pbar = tqdm.tqdm(total=len(data["speex"]))
 for token in data["speex"]:
     loadPackage(3, token)
+    count += 1
     pbar.update(1)
 
+pbar.close()
+
+print("\nblock size send...")
+time.sleep(0.1)
+pbar = tqdm.tqdm(total=1)
+loadPackage(1, (count, ))
+pbar.update(1)
+time.sleep(0.1)
 pbar.close()
 
 print("\nwaiting disconnection...")
