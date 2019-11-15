@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+encoding//Inc/defines.h=UTF-8
+encoding//Inc/tm_stm32_hd44780.h=UTF-8
+encoding//Inc/ws2812b.h=UTF-8
+encoding//Src/freertos.c=Cp1251
+encoding//Src/tm_stm32_hd44780.c=UTF-8
+encoding//Src/ws2812b.c=UTF-8
+encoding/<project>=UTF-8
