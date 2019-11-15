@@ -2,8 +2,8 @@
 #include "stdbool.h"
 #include "string.h"
 
-#define RECV_BUFFER_LEN 100
-#define SEND_BUFFER_LEN 100
+#define RECV_BUFFER_LEN 150
+#define SEND_BUFFER_LEN 150
 #define START_BYTES     0xAAAA
 #define HEAD_SIZE       3   // 3 байта
 

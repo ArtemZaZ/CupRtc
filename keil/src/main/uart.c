@@ -1,6 +1,6 @@
 #include "uart.h"
 
-StatePackage statePackage;
+BlocksPackage blocksPackage;
 TextPackage textPackage;
 SpeexPackage speexPackage;
 FeedbackPackage fbPackage;
@@ -55,12 +55,12 @@ void Receiving_Data_Usart(void){
 	uint8_t desc = 0;
 	uint8_t numb_of_text = 1;
 	while(desc != 4){ //пока не придет сообщение с компа об окончании передачи
-		desc = recv(Usart_read_arr, &statePackage, &textPackage, &speexPackage, &fbPackage);
+		desc = recv(Usart_read_arr, &blocksPackage, &textPackage, &speexPackage, &fbPackage);
 		switch(desc){
 			// работа с местом участника: statePackage.state
 			case 1:
 				eeprom_write_enable();
-				eeprom_write_buffer(&statePackage.state, 1, STATE_ADDRESS);
+				eeprom_write_buffer((uint8_t*)&blocksPackage.data, 2, NUM_FRAME_ADDRESS);
 				sendFeedback(Usart_send_array, 0);
 				break;
 			// работа с текстами: textPackage.textnum, textPackage.text

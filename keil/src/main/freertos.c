@@ -25,7 +25,6 @@ uint8_t page4_text1[16] = {0};
 uint8_t page4_text2[16] = {0};
 
 void freertos_init(void){
-	
 	lcd_buffer_filling();
 	
 	vSemaphoreCreateBinary(led);
@@ -100,7 +99,9 @@ void StartButtonTask(void const * argument)
 			}
 			
 			if(delay >= 1500){
-				play_message_from_eeprom(SPEEX_ADDRESS, 794);
+				uint16_t num_of_frame = 0;
+				eeprom_read_buffer( (uint8_t *)&num_of_frame, 32, 0x00);
+				play_message_from_eeprom(SPEEX_ADDRESS, num_of_frame);
 			}
 			else{
 				Led_mode++;

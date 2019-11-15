@@ -1,14 +1,19 @@
 #pragma once
 #include "stdint.h"
-#define MAX_TEXT_SIZE       50
+#define MAX_TEXT_SIZE       100
 #define SPEEX_BLOCK_SIZE    20
 
+
+#define STATE_ADDRESS 0x0000
+#define TEXT_ADDRESS  0x0020
+#define NUMB_OF_TEXT  8
+#define SPEEX_ADDRESS 0x0120
 
 typedef struct
 {
   uint16_t checksum;  // избыточный код
   uint8_t descriptor;       // дескриптор пакета
-  uint16_t data;      // количество блоков
+  uint16_t data;      // количество блоков                  Ы
 } BlocksPackage;
 
 typedef struct

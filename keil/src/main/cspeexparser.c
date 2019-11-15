@@ -12,7 +12,7 @@ static uint32_t getSizeByDesc(uint8_t desc)  // получение размер�
   switch(desc)
   {
     case 1:
-      return 1;
+      return 2;
     
     case 2:
       return 1 + MAX_TEXT_SIZE;
@@ -48,7 +48,7 @@ static uint16_t crc16Xmodem(uint8_t* ptr, uint8_t count)    // получени�
   return (crc);
 }
 
-uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, TextPackage* text, SpeexPackage* speex, FeedbackPackage* fb)
+uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), BlocksPackage* state, TextPackage* text, SpeexPackage* speex, FeedbackPackage* fb)
 {
   static uint8_t recvBuffer[RECV_BUFFER_LEN];     // буффер в который читается пакет
   uint8_t* recvBufferCounter = recvBuffer;    // каретка
@@ -88,7 +88,7 @@ uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, Text
     case 1:
       state->descriptor = descriptor;
       state->checksum = checksum;
-      state->state = *recvBufferCounter;
+      state->data = *((uint16_t*)recvBufferCounter);
       break;
       
     case 2:
@@ -104,7 +104,7 @@ uint8_t recv(void (*readArrayFun)(uint8_t*, uint32_t), StatePackage* state, Text
       speex->checksum = checksum;
       strncpy((char*)(speex->data), (char*)recvBufferCounter, SPEEX_BLOCK_SIZE);
       break;
-     
+		
     case 4:
       fb->descriptor = descriptor;
       fb->checksum = checksum;
