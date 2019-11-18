@@ -89,10 +89,10 @@ void StartLCDTask(void const * argument)
 
 void StartButtonTask(void const * argument)
 {
-	int delay = 0;
 	
 	while(1){
 		if(AntiContactBounce(GPIOA, GPIO_Pin_1)){
+			int delay = 0;
 			while(!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) && delay < 1500){
 				delay+=100;
 				osDelay(100);

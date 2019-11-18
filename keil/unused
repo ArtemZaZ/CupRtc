@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Nov 15 13:41:52 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Mon Nov 18 09:12:15 2019
 ;VERSION 0.2
 ;FILE bits.o
 speex_bits_destroy <= USED 0
