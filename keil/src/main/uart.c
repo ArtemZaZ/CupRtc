@@ -1,11 +1,18 @@
 #include "uart.h"
 
+/*
+*Структуры для работы с полученными по uart-у данными
+*/
 BlocksPackage blocksPackage;
 TextPackage textPackage;
 SpeexPackage speexPackage;
 FeedbackPackage fbPackage;
 
-void Usart_Init(void){
+/*
+*Инициализация Uart-a
+*/
+void Usart_Init(void)
+{
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 	
@@ -31,7 +38,11 @@ void Usart_Init(void){
 	USART_Cmd(USART2, ENABLE);
 }
 
-void Usart_read_arr(uint8_t * arr, uint32_t size){
+/*
+*Чтение массива данных по uart
+*/
+void Usart_read_arr(uint8_t * arr, uint32_t size)
+{
 	while(size > 0){
 		while( !USART_GetFlagStatus(USART2, USART_FLAG_RXNE) );
 		*arr = (uint8_t)USART_ReceiveData(USART2);
@@ -40,14 +51,27 @@ void Usart_read_arr(uint8_t * arr, uint32_t size){
 	}
 }
 
-void Usart_send_array(uint8_t * arr, uint32_t size){
+/*
+*Отправка массива данных по uart
+*/
+void Usart_send_array(uint8_t * arr, uint32_t size)
+{
 	for(int i = 0; i < size; i++){
 		while( !USART_GetFlagStatus(USART2, USART_FLAG_TXE) );
 		USART_SendData(USART2, arr[i]);
 	}
 }
 
-void Receiving_Data_Usart(void){
+/*
+*Примем полного пакета данных по uart
+*Оиждает приема сообщения с внешконего источника, после по дескриптору
+*определяет что конкретно сейчас было получено
+*Полный пакет: кол-во фреймов для speex-а, 8 текстов для дисплея,
+*массив для speex-а.
+*Все полученные данные отправляются во внешний епром.
+*/
+void Receiving_Data_Usart(void)
+{
 	uint8_t buf[160] = {0};
 	sendFeedback(Usart_send_array, 1); //на случай если пеедача запущена раньше, чем начал принимать кубок (произойдет перессылка первого пакета)
 	uint16_t address_spx = 0;
@@ -57,7 +81,7 @@ void Receiving_Data_Usart(void){
 	while(desc != 4){ //пока не придет сообщение с компа об окончании передачи
 		desc = recv(Usart_read_arr, &blocksPackage, &textPackage, &speexPackage, &fbPackage);
 		switch(desc){
-			// работа с местом участника: statePackage.state
+			// работа с кол-вом фреймов: blocksPackage.data
 			case 1:
 				eeprom_write_enable();
 				eeprom_write_buffer((uint8_t*)&blocksPackage.data, 2, NUM_FRAME_ADDRESS);
@@ -102,7 +126,13 @@ void Receiving_Data_Usart(void){
 	}
 }
 
-void wait_data_reception(void){
+/*
+*Включение режима запси.
+*Запустить можно только при включении платы и зажатой кнопки.
+*После успешного включения будет ждать приема данных по uart
+*/
+void wait_data_reception(void)
+{
 	uint16_t delay = 0;
 	//висим пока нажата кнопка и шлем по юарту фидбэк, чтобы, если комп уже отправлял пакеты, сделал это еще раз
 	while(!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1)){

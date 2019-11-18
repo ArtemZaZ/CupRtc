@@ -20,31 +20,22 @@
 
 //Инициализация SPI
 void SPIinit(void);
-
 //Отправка байта в eeprom
 void eeprom_send_byte(uint16_t inst);
-
 //Чтение байта из eeprom
 uint16_t eeprom_read_byte(void);
-
 //Инструкция включения записи 
 void eeprom_write_enable(void);
-
 //Инструкция отключения записи
 void eeprom_write_disable(void);
-
 //Получение регистра состояния eeprom
 uint16_t eeprom_read_status_register(void);
-
 //Запись регистра состояний eeprom
 void eeprom_write_status_register(uint8_t reg);
-
 //Отправка буфферва в eeprom с контролем страниц
 void eeprom_write_buffer(uint8_t *buf, uint16_t size, uint16_t address);
-
 //Чтение буфера даннызх из eeprom
 void eeprom_read_buffer(uint8_t *buf, uint16_t size, uint16_t address);
-
 //Отправка массива в eeprom
 void eeprom_write_page(uint8_t *buf, uint16_t size, uint16_t address);
 

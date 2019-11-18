@@ -1,11 +1,5 @@
 #include "Spx.h"
 
-#define FRAME_SIZE             160
-#define ENCODED_FRAME_SIZE      20
-
-extern xSemaphoreHandle led;
-extern xSemaphoreHandle lcd;
-
 volatile int16_t OUT_Buffer[2][FRAME_SIZE];
 volatile int16_t *outBuffer;
 

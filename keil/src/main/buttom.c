@@ -1,11 +1,11 @@
 #include "buttom.h"
 
-#define NUMBER_OF_POLLS 10
 
-extern xSemaphoreHandle buttom;
-extern uint8_t Led_mode;
-
-void InitButtom(void){
+/*
+*Функция инициализации кнопки на первом пине порта А
+*/
+void InitButtom(void)
+{
 	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
 	GPIO_InitTypeDef ResetButtom;
 	ResetButtom.GPIO_Mode = GPIO_Mode_IN_FLOATING;
@@ -14,6 +14,10 @@ void InitButtom(void){
 	GPIO_Init( GPIOA, &ResetButtom);
 }
 
+
+/*
+*Функция устранения дребезга кнопки
+*/
 uint8_t AntiContactBounce(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 {
 	uint8_t numOfPolls;

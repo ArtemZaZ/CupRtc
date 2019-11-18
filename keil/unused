@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Mon Nov 18 09:12:15 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Mon Nov 18 10:18:10 2019
 ;VERSION 0.2
 ;FILE bits.o
 speex_bits_destroy <= USED 0
@@ -7,7 +7,6 @@ speex_bits_insert_terminator <= USED 0
 speex_bits_nbytes <= USED 0
 speex_bits_peek <= USED 0
 speex_bits_peek_unsigned <= USED 0
-speex_bits_read_from <= USED 0
 speex_bits_read_whole_bytes <= USED 0
 speex_bits_rewind <= USED 0
 speex_bits_set_bit_buffer <= USED 0
@@ -23,7 +22,6 @@ speex_buffer_resize <= USED 0
 speex_buffer_write <= USED 0
 speex_buffer_writezeros <= USED 0
 ;FILE buttom.o
-AntiContactBounce <= USED 0
 __asm___8_buttom_c_d7660890____REV16 <= USED 0
 __asm___8_buttom_c_d7660890____REVSH <= USED 0
 __asm___8_buttom_c_d7660890____RRX <= USED 0
@@ -111,8 +109,8 @@ qmf_decomp <= USED 0
 qmf_synth <= USED 0
 syn_percep_zero16 <= USED 0
 ;FILE freertos.o
-StartButtonTask <= USED 0
-StartRGBws2812bTask <= USED 0
+ChangeLedMode <= USED 0
+StartLCDTask <= USED 0
 __asm___10_freertos_c_b8801e39____REV16 <= USED 0
 __asm___10_freertos_c_b8801e39____REVSH <= USED 0
 __asm___10_freertos_c_b8801e39____RRX <= USED 0
@@ -120,8 +118,13 @@ __asm___10_freertos_c_b8801e39____RRX <= USED 0
 vPortInitialiseBlocks <= USED 0
 xPortGetFreeHeapSize <= USED 0
 ;FILE lcd.o
-Cleaning <= USED 0
-PrintVar <= USED 0
+LcdCleaning <= USED 0
+LcdClearScreen <= USED 0
+LcdCursor <= USED 0
+LcdPrintStr <= USED 0
+LcdPrintVar <= USED 0
+LcdSendByte <= USED 0
+PulseLCD <= USED 0
 __asm___5_Lcd_c_rus____REV16 <= USED 0
 __asm___5_Lcd_c_rus____REVSH <= USED 0
 __asm___5_Lcd_c_rus____RRX <= USED 0
@@ -165,6 +168,9 @@ vQueueAddToRegistry <= USED 0
 vQueueDelete <= USED 0
 vQueueUnregisterQueue <= USED 0
 xQueueCreateMutex <= USED 0
+xQueueGenericCreate <= USED 0
+xQueueGenericReset <= USED 0
+xQueueGenericSend <= USED 0
 xQueueGenericSendFromISR <= USED 0
 xQueueGiveFromISR <= USED 0
 xQueueIsQueueEmptyFromISR <= USED 0
@@ -173,8 +179,8 @@ xQueuePeek <= USED 0
 xQueuePeekFromISR <= USED 0
 xQueueReceive <= USED 0
 xQueueReceiveFromISR <= USED 0
+xQueueSemaphoreTake <= USED 0
 ;FILE speex.o
-speex_decode_int <= USED 0
 speex_decode_native <= USED 0
 speex_decoder_destroy <= USED 0
 speex_encode_int <= USED 0
@@ -201,7 +207,6 @@ __asm___5_Spx_c_8dddf197____REV16 <= USED 0
 __asm___5_Spx_c_8dddf197____REVSH <= USED 0
 __asm___5_Spx_c_8dddf197____RRX <= USED 0
 play_message <= USED 0
-play_message_from_eeprom <= USED 0
 ;FILE startup_stm32f103xb.o
 ;FILE stm32f10x_dma.o
 DMA_ClearFlag <= USED 0
@@ -302,7 +307,6 @@ TIM_ClearOC1Ref <= USED 0
 TIM_ClearOC2Ref <= USED 0
 TIM_ClearOC3Ref <= USED 0
 TIM_ClearOC4Ref <= USED 0
-TIM_Cmd <= USED 0
 TIM_CounterModeConfig <= USED 0
 TIM_CtrlPWMOutputs <= USED 0
 TIM_DMACmd <= USED 0
@@ -431,6 +435,7 @@ __asm___18_system_stm32f10x_c_5d646a67____REVSH <= USED 0
 __asm___18_system_stm32f10x_c_5d646a67____RRX <= USED 0
 ;FILE tasks.o
 pcTaskGetName <= USED 0
+pvTaskIncrementMutexHeldCount <= USED 0
 ulTaskNotifyTake <= USED 0
 uxTaskGetNumberOfTasks <= USED 0
 uxTaskPriorityGet <= USED 0
@@ -438,20 +443,29 @@ uxTaskPriorityGetFromISR <= USED 0
 uxTaskResetEventItemValue <= USED 0
 vTaskDelete <= USED 0
 vTaskEndScheduler <= USED 0
+vTaskInternalSetTimeOutState <= USED 0
+vTaskMissedYield <= USED 0
 vTaskNotifyGiveFromISR <= USED 0
+vTaskPlaceOnEventList <= USED 0
 vTaskPlaceOnUnorderedEventList <= USED 0
+vTaskPriorityDisinheritAfterTimeout <= USED 0
 vTaskPrioritySet <= USED 0
 vTaskRemoveFromUnorderedEventList <= USED 0
 vTaskResume <= USED 0
 vTaskSetTimeOutState <= USED 0
 vTaskSuspend <= USED 0
+xTaskCheckForTimeOut <= USED 0
 xTaskGenericNotify <= USED 0
 xTaskGenericNotifyFromISR <= USED 0
 xTaskGetCurrentTaskHandle <= USED 0
+xTaskGetSchedulerState <= USED 0
 xTaskGetTickCount <= USED 0
 xTaskGetTickCountFromISR <= USED 0
 xTaskNotifyStateClear <= USED 0
 xTaskNotifyWait <= USED 0
+xTaskPriorityDisinherit <= USED 0
+xTaskPriorityInherit <= USED 0
+xTaskRemoveFromEventList <= USED 0
 xTaskResumeFromISR <= USED 0
 ;FILE uart.o
 Usart_read_arr <= USED 0
@@ -462,20 +476,10 @@ __asm___6_uart_c_7fdd38d6____RRX <= USED 0
 ;FILE vq.o
 vq_nbest_sign <= USED 0
 ;FILE ws2812b.o
-HSV <= USED 0
 __asm___9_ws2812b_c_dbfc8092____REV16 <= USED 0
 __asm___9_ws2812b_c_dbfc8092____REVSH <= USED 0
 __asm___9_ws2812b_c_dbfc8092____RRX <= USED 0
-ws2812b_is_ready <= USED 0
-ws2812b_send <= USED 0
-ws2812b_set <= USED 0
 ;FILE ws2812b_modes.o
-Mode_1 <= USED 0
-Mode_2 <= USED 0
-Mode_2_buffer_fill <= USED 0
-Mode_3 <= USED 0
-Shift_led <= USED 0
-Turn_on_Led_mode <= USED 0
 __asm___15_ws2812b_modes_c_Led_mode____REV16 <= USED 0
 __asm___15_ws2812b_modes_c_Led_mode____REVSH <= USED 0
 __asm___15_ws2812b_modes_c_Led_mode____RRX <= USED 0

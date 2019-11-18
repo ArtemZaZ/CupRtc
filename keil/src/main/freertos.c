@@ -5,13 +5,7 @@ void StartButtonTask(void const * argument);
 void StartLCDTask(void const * argument);
 void ChangeLedMode(void const * argument);
 
-xSemaphoreHandle led;
-xSemaphoreHandle lcd;
-
 extern uint8_t Led_mode;
-extern const uint8_t RUS[66];
-extern const char rus[];
-extern struct rgb_struct rgb;
 
 void lcd_buffer_filling(void);
 
@@ -26,11 +20,6 @@ uint8_t page4_text2[16] = {0};
 
 void freertos_init(void){
 	lcd_buffer_filling();
-	
-	vSemaphoreCreateBinary(led);
-	xSemaphoreGive(led);
-	vSemaphoreCreateBinary(lcd);
-	xSemaphoreGive(lcd);
 	
 	xTaskCreate( (TaskFunction_t) StartButtonTask, "StartButtonTask", 128, NULL, 85, NULL);
 	xTaskCreate( (TaskFunction_t) StartRGBws2812bTask, "StartRGBws2812bTask", 128, NULL, 85, NULL);
@@ -50,46 +39,41 @@ void StartLCDTask(void const * argument)
 {
 	int page = 1;
 	while(1) {
-		if(xSemaphoreTake(lcd, portMAX_DELAY )){
-			ClearLCDScreen();
-			switch(page){
-				case 1:
-					Cursor(0,(16 - strlen((char *)page1_text1)) / 2);
-					PrintStr((char *) page1_text1);
-					Cursor(1,(16 - strlen((char *)page1_text2)) / 2);
-					PrintStr((char *) page1_text2);
-					break;
-				case 2:
-					Cursor(0,(16 - strlen((char *)page2_text1)) / 2);
-					PrintStr((char *) page2_text1);
-					Cursor(1,(16 - strlen((char *)page2_text2)) / 2);
-					PrintStr((char *) page2_text2);
-					break;
-				case 3:
-					Cursor(0,(16 - strlen((char *)page3_text1)) / 2);
-					PrintStr((char *) page3_text1);
-					Cursor(1,(16 - strlen((char *)page3_text2)) / 2);
-					PrintStr((char *) page3_text2);
-					break;
-				case 4:
-					Cursor(0,(16 - strlen((char *)page4_text1)) / 2);
-					PrintStr((char *) page4_text1);
-					Cursor(1,(16 - strlen((char *)page4_text2)) / 2);
-					PrintStr((char *) page4_text2);
-					break;
-			}
-			page++;
-			if(page > 4) page = 1;
-			xSemaphoreGive(lcd);
+		LcdClearScreen();
+		switch(page){
+			case 1:
+				LcdCursor(0,(16 - strlen((char *)page1_text1)) / 2);
+				LcdPrintStr((char *) page1_text1);
+				LcdCursor(1,(16 - strlen((char *)page1_text2)) / 2);
+				LcdPrintStr((char *) page1_text2);
+				break;
+			case 2:
+				LcdCursor(0,(16 - strlen((char *)page2_text1)) / 2);
+				LcdPrintStr((char *) page2_text1);
+				LcdCursor(1,(16 - strlen((char *)page2_text2)) / 2);
+				LcdPrintStr((char *) page2_text2);
+				break;
+			case 3:
+				LcdCursor(0,(16 - strlen((char *)page3_text1)) / 2);
+				LcdPrintStr((char *) page3_text1);
+				LcdCursor(1,(16 - strlen((char *)page3_text2)) / 2);
+				LcdPrintStr((char *) page3_text2);
+				break;
+			case 4:
+				LcdCursor(0,(16 - strlen((char *)page4_text1)) / 2);
+				LcdPrintStr((char *) page4_text1);
+				LcdCursor(1,(16 - strlen((char *)page4_text2)) / 2);
+				LcdPrintStr((char *) page4_text2);
+				break;
 		}
+		page++;
+		if(page > 4) page = 1;
 		osDelay(10000);
-		taskYIELD();
 	}
 }
 
 void StartButtonTask(void const * argument)
 {
-	
 	while(1){
 		if(AntiContactBounce(GPIOA, GPIO_Pin_1)){
 			int delay = 0;
@@ -115,12 +99,7 @@ void StartButtonTask(void const * argument)
 void StartRGBws2812bTask(void const * argument) 
 {
 	while(1){
-		if(xSemaphoreTake(led, portMAX_DELAY )){
-			Turn_on_Led_mode(Led_mode);
-			xSemaphoreGive(led);
-		}
-		osDelay(5);
-		taskYIELD();
+		Turn_on_Led_mode(Led_mode);
 	}
 }
 

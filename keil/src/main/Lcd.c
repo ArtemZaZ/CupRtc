@@ -35,8 +35,10 @@ const uint8_t RUS[66]={0x41,0xA0,0x42,0xA1,0xE0,0x45,0xA2,
 											//ы    ь    э    ю    я
 												0xC3,0xC4,0xC5,0xC6,0xC7};
 
-//---Импульс на ноге Е для записи дисплеем заданных параметров---//
-void PulseLCD()
+/*
+*Импульс на ноге Е для записи дисплеем заданных параметров
+*/
+void PulseLCD(void)
 {
 	LCM_OUT_A |= LCM_PIN_EN;     //ставим бит Е и ждем 2мкс
 	delay_us(2);
@@ -44,8 +46,10 @@ void PulseLCD()
 	taskYIELD();
 }
 
-//---Отсылка байта в дисплей---//
-void SendByte(char ByteToSend, int IsData)
+/*
+*Отсылка байта в дисплей
+*/
+void LcdSendByte(char ByteToSend, int IsData)
 {
 	LCM_OUT_A &= ~(LCM_PIN_MASK_A);               //выкавыриваем старший полубайт из команды
 	LCM_OUT_B &= ~(LCM_PIN_MASK_B);               //и расставляем биты на нужных ножках
@@ -82,9 +86,11 @@ void SendByte(char ByteToSend, int IsData)
 	LCM_OUT_A &= ~(LCM_PIN_MASK_A); //зачищаем используемые ноги
 	LCM_OUT_B &= ~(LCM_PIN_MASK_B); //на обоих портах
 }
- 
-//---Установка позиции курсора---//
-void Cursor(char Row, char Col)
+
+/*
+*Установка позиции курсора
+*/
+void LcdCursor(char Row, char Col)
 {
 	char address;
 	if (Row == 0)
@@ -92,25 +98,31 @@ void Cursor(char Row, char Col)
 	else               //и отправляем команды с этим адресом
 		address = 0x40;
 	address |= Col;
-	SendByte(0x80 | address, 0);
+	LcdSendByte(0x80 | address, 0);
 }
  
-//---Очистка дисплея---//
-void ClearLCDScreen()
+/*
+*Очистка дисплея
+*/
+void LcdClearScreen(void)
 {
-	SendByte(0x01, 0); //команда с одной единичкой
+	LcdSendByte(0x01, 0); //команда с одной единичкой
 	osDelay(3);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//---Импульс на ноге Е для записи дисплеем заданных параметров---//
-void PulseLCD_1()
+
+/*
+*ВНИМАНИЕ КОСТЫЛИ
+*Две функции ниже являются локальными и нужны только для инициализации дисплея
+*они являются полными копиями функций SendByte() и PulseLCD() за исключением исполнения
+*задержек, так как для успешной работы дисплея в системе freertos задержки должны быть
+*freertos-овскими, а при инициализации дисплея freertos еще не запущен. 
+*/
+void PulseLCD_1(void)
 {
 	LCM_OUT_A |= LCM_PIN_EN;     //ставим бит Е и ждем 2мкс
 	delay_us(2);
 	LCM_OUT_A &= (~LCM_PIN_EN);  //потом снимаем
 }
-
-//---Отсылка байта в дисплей---//
 void SendByte_1(char ByteToSend, int IsData)
 {
 	LCM_OUT_A &= ~(LCM_PIN_MASK_A);               //выкавыриваем старший полубайт из команды
@@ -148,8 +160,10 @@ void SendByte_1(char ByteToSend, int IsData)
 	LCM_OUT_A &= ~(LCM_PIN_MASK_A); //зачищаем используемые ноги
 	LCM_OUT_B &= ~(LCM_PIN_MASK_B); //на обоих портах
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//---Инициализация дисплея---//
+
+/*
+*Инициализация дисплея
+*/
 void LCD_Init(void)
 {
 	Delay_Init();
@@ -211,8 +225,10 @@ void LCD_Init(void)
 	SendByte_1(0x0C, 0);      //1100 экран включен + курсор выключен + курсор не мигает
 }
  
-//---Печать строки---//
-void PrintStr(char *Text)
+/*
+*Печать строки
+*/
+void LcdPrintStr(char *Text)
 {	
 	char *c = Text;
 	while ((c != 0) && (*c != 0) && (*c != 0x0A))    //перебираем символы из текста
@@ -221,40 +237,37 @@ void PrintStr(char *Text)
 		strncpy( y, c, 2);  //проверяем не русский ли символ
 		if(y){
 			if(strstr(rus, y)){          //если русский, то кодировку берем из массива
-				SendByte(RUS[abs(rus - strstr(rus, y)) / 2], 1);
+				LcdSendByte(RUS[abs(rus - strstr(rus, y)) / 2], 1);
 				c += 2; //*кейл кодирует кириллицу двумя байтами
 			}
 			else 
 			{
-				SendByte(*c, 1);           //если английский, то подойдет кодировка кейла
+				LcdSendByte(*c, 1);           //если английский, то подойдет кодировка кейла
 				c+=1;
 			}
 		}
 		taskYIELD();
 	}
 }
-//---Печать переменной---//
-void PrintVar(int y)
+
+/*
+*Печать переменной
+*/
+void LcdPrintVar(int y)
 {	
-	//int x = 3;
-	//if(y > 0){
-	//	x = x + (int)log10(y);
-	//}
-	//char * str = malloc(x * sizeof(char));              //переводим число в строку
-	//char * u = "" + y;
 	char str[8];
 	sprintf (str, "%i", y);
-	//char * c;
-	//strcpy(c, str);
-	
-	PrintStr(str);     //и отправляем уже как строку
+	LcdPrintStr(str);
 }
-//---Зачистка куска дисплея---//
-void Cleaning (int row, int col, int number)
+
+/*
+*Зачистка куска дисплея
+*/
+void LcdCleaning (int row, int col, int number)
 {
-	Cursor(row, col);
+	LcdCursor(row, col);
 	for(int i = 0; i < number; i++){
-		SendByte(' ', 1);
+		LcdSendByte(' ', 1);
 		taskYIELD();
 	}
 }

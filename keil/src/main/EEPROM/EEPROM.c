@@ -1,7 +1,8 @@
 #include "EEPROM.h"
 
 
-void SPIinit(void){
+void SPIinit(void)
+{
 	spi_init();
 	//проверка флага на то что инициализация spi прошла успешно
 	if(SPI_I2S_GetFlagStatus(SPI2,SPI_FLAG_MODF) == 1){
@@ -12,7 +13,8 @@ void SPIinit(void){
 /*
 *Функция отправки байта по spi
 */
-void eeprom_send_byte(uint16_t inst){
+void eeprom_send_byte(uint16_t inst)
+{
 	SPI_I2S_SendData(SPI2, inst);
 	//{Хазанский Р.Р.(авторитет) сказал проверять все три флага после отправки
 	while( !SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE));
@@ -23,7 +25,8 @@ void eeprom_send_byte(uint16_t inst){
 /*
 *Функиця получения байта по spi
 */
-uint16_t eeprom_read_byte(void){
+uint16_t eeprom_read_byte(void)
+{
 	//при плучении байта необходимо генерировать такт на ноге CLOCK
 	//единсвенный способ это делать - отрпавлять по spi 0
 	SPI_I2S_SendData(SPI2, 0); 
@@ -39,7 +42,8 @@ uint16_t eeprom_read_byte(void){
 *WRDI (запрет записи), после выполнения WRSR (после записи регистра состояния),
 *после завершения записи в память.
 */
-void eeprom_write_enable(void){
+void eeprom_write_enable(void)
+{
 	EEPROM_CS_LOW();
 	eeprom_send_byte( WREN );
 	EEPROM_CS_HIGH();
@@ -49,7 +53,8 @@ void eeprom_write_enable(void){
 /*
 *Отрпавлка команды на запрет записи
 */
-void eeprom_write_disable(void){
+void eeprom_write_disable(void)
+{
 	EEPROM_CS_LOW();
 	eeprom_send_byte( WRDI );
 	EEPROM_CS_HIGH();
@@ -66,7 +71,8 @@ void eeprom_write_disable(void){
 *b1 - WEL - бит разрешения записи
 *b0 - WIP - показывает занята ли память каким-нибудь циклом записи
 */
-uint16_t read_status_register(void){
+uint16_t read_status_register(void)
+{
 	EEPROM_CS_LOW();
 	eeprom_send_byte( RDSR );
 	uint16_t res = 0;
@@ -81,7 +87,8 @@ uint16_t read_status_register(void){
 *Разрешать запись этой (бит WEL) командой нет смцысла, т.к. после выполнения функции
 *этот бит автоматически сбросится.
 */
-void write_status_register(uint8_t reg){
+void write_status_register(uint8_t reg)
+{
 	EEPROM_CS_LOW();
 	eeprom_send_byte(WRSR);
 	eeprom_send_byte(reg);
@@ -93,7 +100,8 @@ void write_status_register(uint8_t reg){
 *Внутренняя функция отправки 16-ти битного адреса в eeprom. Сначала старший байт, 
 *потом младший.
 */
-void eeprom_send_address(uint16_t address){
+void eeprom_send_address(uint16_t address)
+{
 	eeprom_send_byte(address >> 8);
 	eeprom_send_byte(address);
 }
@@ -101,7 +109,8 @@ void eeprom_send_address(uint16_t address){
 /*
 *Функиця обычного чтения по адресу из eeprom-а
 */
-void eeprom_write_page(uint8_t *buf, uint16_t size, uint16_t address){
+void eeprom_write_page(uint8_t *buf, uint16_t size, uint16_t address)
+{
 	eeprom_write_enable();
 	EEPROM_CS_LOW();
 	eeprom_send_byte(WRITE);
@@ -115,8 +124,12 @@ void eeprom_write_page(uint8_t *buf, uint16_t size, uint16_t address){
 }
 
 /*
+*Функция чтения буфера из внешней памяти.
+*P.s. не уверен, но на мой взгляд, лучше указывать размер буфера кратным 32, т.е.
+*размеру страниц епрома
 */
-void eeprom_read_buffer(uint8_t *buf, uint16_t size, uint16_t address){
+void eeprom_read_buffer(uint8_t *buf, uint16_t size, uint16_t address)
+{
 	EEPROM_CS_LOW();
 	eeprom_send_byte(READ);
 	eeprom_send_address(address);
@@ -127,11 +140,13 @@ void eeprom_read_buffer(uint8_t *buf, uint16_t size, uint16_t address){
 	}
 	EEPROM_CS_HIGH();
 }
+
 /*
 *Функция чтения массива с учетом страниц
-*Данная функция скомунизжена, но работает исправно
+*Данная функция скамунизжена, но работает исправно
 */
-void eeprom_write_buffer(uint8_t *buf, uint16_t size, uint16_t address){
+void eeprom_write_buffer(uint8_t *buf, uint16_t size, uint16_t address)
+{
 	
 	uint16_t NumOfPage = 0, NumOfSingle = 0, Addr = 0/*, count = 0, temp = 0*/;
 	uint16_t sEE_DataNum = 0;
@@ -157,42 +172,4 @@ void eeprom_write_buffer(uint8_t *buf, uint16_t size, uint16_t address){
 			eeprom_write_page(buf, sEE_DataNum, address);
 		}
 	}
-	/*
-	else { // WriteAddr is not EEPROM_PAGESIZE aligned  
-		if (NumOfPage == 0) { // NumByteToWrite < EEPROM_PAGESIZE 
-			if (NumOfSingle > count) { // (NumByteToWrite + WriteAddr) > EEPROM_PAGESIZE 
-				temp = NumOfSingle - count;
-				sEE_DataNum = count;
-				eeprom_write_page(buf, sEE_DataNum, address);
-				address +=  count;
-				buf += count;
-				sEE_DataNum = temp;
-				eeprom_write_page(buf, sEE_DataNum, address);
-			} 
-			else {
-				sEE_DataNum = size;
-				eeprom_write_page(buf, sEE_DataNum, address);
-			}
-		} 
-		else { // NumByteToWrite > EEPROM_PAGESIZE
-			size -= count;
-			NumOfPage =  size / EEPROM_PAGESIZE;
-			NumOfSingle = size % EEPROM_PAGESIZE;
-			sEE_DataNum = count;
-			eeprom_write_page(buf, sEE_DataNum, address);
-			address +=  count;
-			buf += count;
-			while (NumOfPage--) {
-				sEE_DataNum = EEPROM_PAGESIZE;
-				eeprom_write_page(buf, sEE_DataNum, address);
-				address +=  EEPROM_PAGESIZE;
-				buf += EEPROM_PAGESIZE;
-			}
-			if (NumOfSingle != 0) {
-				sEE_DataNum = NumOfSingle;
-				eeprom_write_page(buf, sEE_DataNum, address);
-			}
-		}
-	}
-*/
 }

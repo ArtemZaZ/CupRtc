@@ -8,8 +8,8 @@
 #include "main/Delay.h"
 #include "freertos.h"
 
+//Включение какого-нибудь режима на светодиодах
+//P.s всябиблиотека подстроена под работу с системой freertos
 void Turn_on_Led_mode(uint8_t mode);
-
-void InitButtom(void);
 
 #endif
