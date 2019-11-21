@@ -11,7 +11,7 @@ import tqdm
 
 configFilePath = 'conf.json'       # путь до файла конфигурации
 speexFilePath = 'audio.wav'        # путь до speex файла
-speexFileHeadSize = 0     # размер заголовка спиксового файла в байтах
+speexFileHeadSize = 160     # размер заголовка спиксового файла в байтах
 portPath = "COM3"   # порт и
 baud = 19200                 # боды по умолчанию
 textCodec = "utf-8"
