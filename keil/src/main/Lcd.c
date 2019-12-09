@@ -43,7 +43,6 @@ void PulseLCD(void)
 	LCM_OUT_A |= LCM_PIN_EN;     //ставим бит Е и ждем 2мкс
 	delay_us(2);
 	LCM_OUT_A &= (~LCM_PIN_EN);  //потом снимаем
-	taskYIELD();
 }
 
 /*
@@ -66,7 +65,6 @@ void LcdSendByte(char ByteToSend, int IsData)
 	}
 	PulseLCD();                 //отправляем старший полубайт
 	delay_us(5);
-	taskYIELD();
 	LCM_OUT_A &= ~(LCM_PIN_MASK_A);           //выкавыриваем младший полубайт
 	LCM_OUT_B &= ~(LCM_PIN_MASK_B);           //также расставлем биты по своим
 	LCM_OUT_A |= ((ByteToSend & 0x1)) << 12;  //позициям
@@ -246,7 +244,6 @@ void LcdPrintStr(char *Text)
 				c+=1;
 			}
 		}
-		taskYIELD();
 	}
 }
 
@@ -268,6 +265,5 @@ void LcdCleaning (int row, int col, int number)
 	LcdCursor(row, col);
 	for(int i = 0; i < number; i++){
 		LcdSendByte(' ', 1);
-		taskYIELD();
 	}
 }

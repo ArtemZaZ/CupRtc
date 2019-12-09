@@ -6,6 +6,9 @@
 
 #include "Prj_config.h"
 
+extern uint8_t r2d2[]; 
+extern uint16_t r2d2_size;
+
 int main(){
 	Delay_Init();
 	Usart_Init();
@@ -17,7 +20,8 @@ int main(){
 	ws2812b_init();
 	Speex_Init();
 	LCD_Init();
-	delay_ms(100);
+	delay_ms(10);
+	play_message(r2d2, r2d2_size / 20);
 	
 	freertos_init();
 	osKernelStart();

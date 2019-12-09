@@ -77,7 +77,7 @@ void Receiving_Data_Usart(void)
 	uint16_t address_spx = 0;
 	uint16_t address_buf = 0;
 	uint8_t desc = 0;
-	uint8_t numb_of_text = 1;
+	uint8_t numb_of_text = 0;
 	while(desc != 4){ //пока не придет сообщение с компа об окончании передачи
 		desc = recv(Usart_read_arr, &blocksPackage, &textPackage, &speexPackage, &fbPackage);
 		switch(desc){
@@ -89,9 +89,9 @@ void Receiving_Data_Usart(void)
 				break;
 			// работа с текстами: textPackage.textnum, textPackage.text
 			case 2:
-				if(numb_of_text <= NUMB_OF_TEXT){
+				if(numb_of_text < NUMB_OF_TEXT){
 					eeprom_write_enable();
-					eeprom_write_buffer(textPackage.text, MAX_TEXT_SIZE, TEXT_ADDRESS * numb_of_text);
+					eeprom_write_buffer(textPackage.text, MAX_TEXT_SIZE, TEXT_ADDRESS + (numb_of_text * 0x20));
 					numb_of_text ++;
 					sendFeedback(Usart_send_array, 0);
 				}
@@ -124,6 +124,8 @@ void Receiving_Data_Usart(void)
 				break;
 		}
 	}
+	eeprom_write_enable();
+	eeprom_write_buffer((uint8_t*)&numb_of_text, 2, NUM_TEXT_ADDRESS);
 }
 
 /*

@@ -5,11 +5,11 @@
 #define MAX_TEXT_SIZE       100
 #define SPEEX_BLOCK_SIZE    20
 
-
 #define NUM_FRAME_ADDRESS 0x0000
-#define TEXT_ADDRESS  0x0020
-#define NUMB_OF_TEXT  8
-#define SPEEX_ADDRESS 0x0120
+#define NUM_TEXT_ADDRESS 0x0020
+#define TEXT_ADDRESS  0x0040
+#define NUMB_OF_TEXT  10
+#define SPEEX_ADDRESS 0x0180
 
 typedef struct
 {

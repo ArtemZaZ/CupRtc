@@ -5,6 +5,7 @@ volatile struct rgb_struct rgb;  //структура для получения 
 void Mode_1(void);
 void Mode_2(void);
 void Mode_3(void);
+void Mode_4(void);
 
 uint8_t Led_mode = 0;
 uint8_t Led_mass_now[WS2812B_NUM_LEDS * 3] = {0};
@@ -25,7 +26,9 @@ void Turn_on_Led_mode(uint8_t mode){
 		case 2:   //бегающая радуга по всем светодиодам
 			Mode_3();
 			break;
-			
+		case 3:   //бегающая радуга по всем светодиодам
+			Mode_4();
+			break;
 	}
 }
 /*
@@ -146,5 +149,29 @@ void Mode_3(void){
 			taskYIELD();
 		}
 		osDelay(300);
+	}
+}
+
+/*не доделан*/
+uint8_t led_array_2[WS2812B_NUM_LEDS*3];
+void Mode_4(void){
+	static int H = 0;
+	for(int i = 0; i < WS2812B_NUM_LEDS; i++){
+		while(!ws2812b_is_ready());
+		ws2812b_send();
+		for(int k = 0; k < WS2812B_NUM_LEDS; k++){
+			HSV(H, 255, 130);
+			led_array_2[k * 3] = rgb.r;
+			led_array_2[k * 3 + 1] = rgb.g;
+			led_array_2[k * 3 + 2] = rgb.b;
+			H+=5;
+			if(H > 360) H  = 0;
+			taskYIELD();
+		}
+		for(int j = 0; j < WS2812B_NUM_LEDS; j++){
+			ws2812b_set(j, led_array_2[j*3], led_array_2[j*3 + 1], led_array_2[j*3 + 2]);
+			taskYIELD();
+		}
+		osDelay(100);
 	}
 }
