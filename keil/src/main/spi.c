@@ -47,7 +47,7 @@ void spi_init(void){
 	GPIO_Init(GPIOB, &CS0);
 	GPIO_SetBits(GPIOB, GPIO_Pin_12);
 	
-	//Настраиваем TIM2	
+	//Настраиваем TIM2
 	TIM_TimeBaseInitTypeDef Tim2;
 	Tim2.TIM_Prescaler = 4500; //необходима частота 8кгц
 	Tim2.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -57,7 +57,6 @@ void spi_init(void){
 	NVIC_SetPriority(TIM2_IRQn, 0);
 	
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-	//TIM_Cmd(TIM2, ENABLE);
 }
 
 extern uint8_t interrupt_flag;

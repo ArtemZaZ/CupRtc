@@ -8,21 +8,96 @@ SpeexBits bits;
 void *enc_state, *dec_state;
 int quality = 4, complexity=1, vbr=0, enh=1;
 
+/*
+*Инициализация пакета speex для воспроизведения звуков на динамике
+*/
 void Speex_Init(void)
 {
 	speex_bits_init(&bits);
 	dec_state = speex_decoder_init(&speex_nb_mode);
 	speex_decoder_ctl(dec_state, SPEEX_SET_ENH, &enh);
 	outBuffer = OUT_Buffer[0];
-	spi_init();
+	Speex_SPI_Init();
 }
 
+/*
+*Инициализация переферии для speex-а
+*/
+void Speex_SPI_Init(void){
+	//Настройка SPI
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	SPI_InitTypeDef SPI_Struct;
+	SPI_Struct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	SPI_Struct.SPI_Mode = SPI_Mode_Master;
+	SPI_Struct.SPI_DataSize = SPI_DataSize_8b;
+	SPI_Struct.SPI_CPOL = SPI_CPOL_Low;
+	SPI_Struct.SPI_CPHA = SPI_CPHA_1Edge;
+	SPI_Struct.SPI_NSS = SPI_NSS_Soft;
+	SPI_Struct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
+	SPI_Struct.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_Struct.SPI_CRCPolynomial = 10;
+	SPI_Init(SPI2, &SPI_Struct);
+	SPI_Cmd(SPI2, ENABLE);
+	
+	//Настройка Mosi
+	SPEEX_MOSI_RCC_APBxPeriphClockCmd(SPEEX_MOSI_RCC_APBxPeriph_AFIO, ENABLE);
+	SPEEX_MOSI_RCC_APBxPeriphClockCmd(SPEEX_MOSI_RCC_APBxPeriph_GPIOx, ENABLE);
+	GPIO_InitTypeDef Mosi_Struct;
+	Mosi_Struct.GPIO_Pin = SPEEX_MOSI_GPIO_Pin_x;
+	Mosi_Struct.GPIO_Mode = SPEEX_MOSI_GPIO_Mode;
+	Mosi_Struct.GPIO_Speed = SPEEX_MOSI_GPIO_Speed;
+	GPIO_Init(SPEEX_MOSI_GPIOx, &Mosi_Struct);
+	
+	//Настройка Miso
+	SPEEX_MISO_RCC_APBxPeriphClockCmd(SPEEX_MISO_RCC_APBxPeriph_AFIO, ENABLE);
+	SPEEX_MISO_RCC_APBxPeriphClockCmd(SPEEX_MISO_RCC_APBxPeriph_GPIOx, ENABLE);
+	GPIO_InitTypeDef Miso_Struct;
+	Miso_Struct.GPIO_Pin = SPEEX_MISO_GPIO_Pin_x;
+	Miso_Struct.GPIO_Mode = SPEEX_MISO_GPIO_Mode;
+	Miso_Struct.GPIO_Speed = SPEEX_MISO_GPIO_Speed;
+	GPIO_Init(SPEEX_MISO_GPIOx, &Miso_Struct);
+	
+	//Настройка CLK
+	SPEEX_CLK_RCC_APBxPeriphClockCmd(SPEEX_CLK_RCC_APBxPeriph_AFIO, ENABLE);
+	SPEEX_CLK_RCC_APBxPeriphClockCmd(SPEEX_CLK_RCC_APBxPeriph_GPIOx, ENABLE);
+	GPIO_InitTypeDef Clk_Struct;
+	Clk_Struct.GPIO_Pin = SPEEX_CLK_GPIO_Pin_x;
+	Clk_Struct.GPIO_Mode = SPEEX_CLK_GPIO_Mode;
+	Clk_Struct.GPIO_Speed = SPEEX_CLK_GPIO_Speed;
+	GPIO_Init(SPEEX_CLK_GPIOx, &Clk_Struct);
+	
+	//Настройка CS
+	SPEEX_CS_RCC_APBxPeriphClockCmd(SPEEX_CS_RCC_APBxPeriph_AFIO, ENABLE);
+	SPEEX_CS_RCC_APBxPeriphClockCmd(SPEEX_CS_RCC_APBxPeriph_GPIOx, ENABLE);
+	GPIO_InitTypeDef Cs_Struct;
+	Cs_Struct.GPIO_Pin = SPEEX_CS_GPIO_Pin_x;
+	Cs_Struct.GPIO_Mode = SPEEX_CS_GPIO_Mode;
+	Cs_Struct.GPIO_Speed = SPEEX_CS_GPIO_Speed;
+	GPIO_Init(SPEEX_CS_GPIOx, &Cs_Struct);
+	GPIO_SetBits(SPEEX_CS_GPIOx, SPEEX_CS_GPIO_Pin_x);
+	
+	//Настройка TIM
+	SPEEX_TIM_RCC_APBxPeriphClockCmd(SPEEX_TIM_RCC_APBxPeriph_TIMx, ENABLE);
+	TIM_TimeBaseInitTypeDef Tim_Struct;
+	Tim_Struct.TIM_Prescaler = SPEEX_TIM_TIM_Prescaler; //необходима частота 8кгц
+	Tim_Struct.TIM_ClockDivision = SPEEX_TIM_TIM_ClockDivision;
+	Tim_Struct.TIM_Period = SPEEX_TIM_TIM_Period;
+	Tim_Struct.TIM_CounterMode = SPEEX_TIM_TIM_CounterMode;
+	TIM_TimeBaseInit(SPEEX_TIM_TIMx, &Tim_Struct);
+	NVIC_SetPriority(SPEEX_TIM_TIMx_IRQn, 0);
+	
+	TIM_ITConfig(SPEEX_TIM_TIMx, TIM_IT_Update, ENABLE);
+}
+
+/*
+*Проигрование звука из памати процессора
+*/
 void play_message(unsigned char const *array, uint16_t frame_number)
 {
 	char input_bytes[ENCODED_FRAME_SIZE];
 	volatile uint16_t NB_Frames=0;
-	TIM_Cmd(TIM2, ENABLE);
-	NVIC_EnableIRQ(TIM2_IRQn);
+	TIM_Cmd(SPEEX_TIM_TIMx, ENABLE);
+	NVIC_EnableIRQ(SPEEX_TIM_TIMx_IRQn);
 	int i;
 	uint16_t sample_index = 0;
 	for(i=0;i<ENCODED_FRAME_SIZE; i++)
@@ -71,35 +146,39 @@ void play_message(unsigned char const *array, uint16_t frame_number)
 		}
 	}
 	
-	TIM_Cmd(TIM2, DISABLE);
-	NVIC_DisableIRQ(TIM2_IRQn);
+	TIM_Cmd(SPEEX_TIM_TIMx, DISABLE);
+	NVIC_DisableIRQ(SPEEX_TIM_TIMx_IRQn);
 	sample_index = 0;
 	NB_Frames = 0;
 	outBuffer = OUT_Buffer[0];
 }
 
+/*
+*Проигрование звука из внешней памяти eeprom
+*Да, можно было сделать одной функцией, но мне было лень
+*/
 void play_message_from_eeprom(uint16_t address, uint16_t frame_number){
 	volatile uint16_t NB_Frames=0;
 	char input_bytes[ENCODED_FRAME_SIZE];
-	eeprom_read_buffer((uint8_t *)input_bytes, 20, address);
+	EEPROM_Read_Buffer((uint8_t *)input_bytes, 20, address);
 	address += 20;
 	speex_bits_read_from(&bits, input_bytes, ENCODED_FRAME_SIZE);
 	speex_decode_int(dec_state, &bits, (spx_int16_t*)OUT_Buffer[0]);
 	
-	eeprom_read_buffer((uint8_t *)input_bytes, 20, address);
+	EEPROM_Read_Buffer((uint8_t *)input_bytes, 20, address);
 	address += 20;
 	speex_bits_read_from(&bits, input_bytes, ENCODED_FRAME_SIZE);
 	speex_decode_int(dec_state, &bits, (spx_int16_t*)OUT_Buffer[1]);
 	NB_Frames+=2;
 	
-	TIM_Cmd(TIM2, ENABLE);
-	NVIC_EnableIRQ(TIM2_IRQn);
+	TIM_Cmd(SPEEX_TIM_TIMx, ENABLE);
+	NVIC_EnableIRQ(SPEEX_TIM_TIMx_IRQn);
 
 	while(NB_Frames < frame_number)
 	{
 		if(Start_Decoding == 1)
 		{
-			eeprom_read_buffer((uint8_t *)input_bytes, 20, address);
+			EEPROM_Read_Buffer((uint8_t *)input_bytes, 20, address);
 			address += 20;
 			speex_bits_read_from(&bits, input_bytes, ENCODED_FRAME_SIZE);
 			speex_decode_int(dec_state, &bits, (spx_int16_t*)OUT_Buffer[0]);
@@ -108,7 +187,7 @@ void play_message_from_eeprom(uint16_t address, uint16_t frame_number){
 		}
 		if(Start_Decoding == 2)
 		{
-			eeprom_read_buffer((uint8_t *)input_bytes, 20, address);
+			EEPROM_Read_Buffer((uint8_t *)input_bytes, 20, address);
 			address += 20;
 			speex_bits_read_from(&bits, input_bytes, ENCODED_FRAME_SIZE);
 			speex_decode_int(dec_state, &bits, (spx_int16_t*)OUT_Buffer[1]);
@@ -118,13 +197,14 @@ void play_message_from_eeprom(uint16_t address, uint16_t frame_number){
 		taskYIELD();
 	}
 	taskYIELD();
-	NVIC_DisableIRQ(TIM2_IRQn);
-	TIM_Cmd(TIM2, DISABLE);
+	NVIC_DisableIRQ(SPEEX_TIM_TIMx_IRQn);
+	TIM_Cmd(SPEEX_TIM_TIMx, DISABLE);
 	NB_Frames = 0;
 	outBuffer = OUT_Buffer[0];
 	taskYIELD();
 }
 
+//массив звука кликанья кнопки
 uint16_t bip_size = 620;
 uint8_t bip[] = {
 0x1c,0xce,0xa0,0xab,0x03,0xc7,0xbf,0x13,0x7f,0x64,0xfb,0x3c,0x2f,0x2b,0x3a,
@@ -171,6 +251,7 @@ uint8_t bip[] = {
 0x82,0x76,0xb1,0x1d,0x1a
 };
 
+//звук R2D2 при загрузке кубка
 uint16_t r2d2_size =1220;
 uint8_t r2d2[] = {
 0x1c,0x1b,0xfa,0xe2,0xc9,0xd9,0xa6,0x29,0xef,0x52,0x22,0x78,0x47,0xe8,0x91,

@@ -1,13 +1,20 @@
 #include "Delay.h"
 
-//---Инициализация таймера---//
+#define MS_PRSC 7200
+#define US_PRSC 72
+
+/*
+*Инициализация таймера
+*/
 void Delay_Init (void)
 {
 	RCC -> APB1ENR |= RCC_APB1ENR_TIM4EN;  //подать тактирование на TIM4
 	TIM4 -> CR1 = TIM_CR1_OPM;  //режим одного импульса
 }
 
-//---Задержка в миллисекундах---//
+/*
+*Задержка в миллисекундах
+*/
 void delay_ms(int delay)
 {
 	TIM4->PSC = MS_PRSC - 1;
@@ -17,7 +24,9 @@ void delay_ms(int delay)
 	while ((TIM4->CR1 & TIM_CR1_CEN) != 0);
 }
 
-//---Задержка в микросекундках---//
+/*
+*Задержка в микросекундках
+*/
 void delay_us(int delay)
 {
 	TIM4->PSC = US_PRSC;

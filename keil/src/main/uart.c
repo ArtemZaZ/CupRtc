@@ -11,41 +11,41 @@ FeedbackPackage fbPackage;
 /*
 *Инициализация Uart-a
 */
-void Usart_Init(void)
+void Serial_Init(void)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
+	SERIAL_GPIO_RCC_APBxPeriphClockCmd(SERIAL_GPIO_RCC_APBxPeriph_GPIOx, ENABLE);
+	GPIO_InitTypeDef RxTx_Struct; 
+	//TX
+	RxTx_Struct.GPIO_Pin = SERIAL_TX_GPIO_Pin;
+	RxTx_Struct.GPIO_Speed = SERIAL_TX_GPIO_Speed;
+	RxTx_Struct.GPIO_Mode = SERIAL_TX_GPIO_Mode;
+	GPIO_Init(SERIAL_GPIOx, &RxTx_Struct);
+	//RX
+	RxTx_Struct.GPIO_Pin = SERIAL_RX_GPIO_Pin;
+	RxTx_Struct.GPIO_Mode = SERIAL_RX_GPIO_Mode;
+	GPIO_Init(SERIAL_GPIOx, &RxTx_Struct);
 	
-	GPIO_InitTypeDef RxTx; 
-	//Tx
-	RxTx.GPIO_Pin = GPIO_Pin_2;
-	RxTx.GPIO_Speed = GPIO_Speed_2MHz;
-	RxTx.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_Init(GPIOA, &RxTx);
-	//Rx
-	RxTx.GPIO_Pin = GPIO_Pin_3;
-	RxTx.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &RxTx);
-	
-	USART_InitTypeDef Usart;
-	Usart.USART_BaudRate = 19200;
-	Usart.USART_WordLength = USART_WordLength_8b;
-	Usart.USART_StopBits = USART_StopBits_1;
-	Usart.USART_Parity = USART_Parity_No;
-	Usart.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	Usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_Init(USART2, &Usart);
-	USART_Cmd(USART2, ENABLE);
+	//UART
+	SERIAL_RCC_APBxPeriphClockCmd(SERIAL_RCC_APBxPeriph_USARTx,ENABLE);
+	USART_InitTypeDef Usart_Struct;
+	Usart_Struct.USART_BaudRate = SERIAL_USART_BaudRate;
+	Usart_Struct.USART_WordLength = SERIAL_USART_WordLength;
+	Usart_Struct.USART_StopBits = SERIAL_USART_StopBits;
+	Usart_Struct.USART_Parity = SERIAL_USART_Parity;
+	Usart_Struct.USART_Mode = SERIAL_USART_Mode;
+	Usart_Struct.USART_HardwareFlowControl = SERIAL_USART_HardwareFlowControl;
+	USART_Init(SERIAL_USARTx, &Usart_Struct);
+	USART_Cmd(SERIAL_USARTx, ENABLE);
 }
 
 /*
 *Чтение массива данных по uart
 */
-void Usart_read_arr(uint8_t * arr, uint32_t size)
+void Uart_Read_Array(uint8_t * arr, uint32_t size)
 {
 	while(size > 0){
-		while( !USART_GetFlagStatus(USART2, USART_FLAG_RXNE) );
-		*arr = (uint8_t)USART_ReceiveData(USART2);
+		while( !USART_GetFlagStatus(SERIAL_USARTx, USART_FLAG_RXNE) );
+		*arr = (uint8_t)USART_ReceiveData(SERIAL_USARTx);
 		size--;
 		arr++;
 	}
@@ -54,49 +54,49 @@ void Usart_read_arr(uint8_t * arr, uint32_t size)
 /*
 *Отправка массива данных по uart
 */
-void Usart_send_array(uint8_t * arr, uint32_t size)
+void Uart_Send_Array(uint8_t * arr, uint32_t size)
 {
 	for(int i = 0; i < size; i++){
-		while( !USART_GetFlagStatus(USART2, USART_FLAG_TXE) );
-		USART_SendData(USART2, arr[i]);
+		while( !USART_GetFlagStatus(SERIAL_USARTx, USART_FLAG_TXE) );
+		USART_SendData(SERIAL_USARTx, arr[i]);
 	}
 }
 
 /*
 *Примем полного пакета данных по uart
-*Оиждает приема сообщения с внешконего источника, после по дескриптору
+*Ожидает приема сообщения с внешнего источника, после по дескриптору
 *определяет что конкретно сейчас было получено
-*Полный пакет: кол-во фреймов для speex-а, 8 текстов для дисплея,
+*Полный пакет: кол-во фреймов для speex-а, 10 текстов для дисплея,
 *массив для speex-а.
 *Все полученные данные отправляются во внешний епром.
 */
 void Receiving_Data_Usart(void)
 {
 	uint8_t buf[160] = {0};
-	sendFeedback(Usart_send_array, 1); //на случай если пеедача запущена раньше, чем начал принимать кубок (произойдет перессылка первого пакета)
+	sendFeedback(Uart_Send_Array, 1); //на случай если передача запущена раньше, чем начал принимать кубок (произойдет перессылка первого пакета)
 	uint16_t address_spx = 0;
 	uint16_t address_buf = 0;
 	uint8_t desc = 0;
 	uint8_t numb_of_text = 0;
 	while(desc != 4){ //пока не придет сообщение с компа об окончании передачи
-		desc = recv(Usart_read_arr, &blocksPackage, &textPackage, &speexPackage, &fbPackage);
+		desc = recv(Uart_Read_Array, &blocksPackage, &textPackage, &speexPackage, &fbPackage);
 		switch(desc){
 			// работа с кол-вом фреймов: blocksPackage.data
 			case 1:
-				eeprom_write_enable();
-				eeprom_write_buffer((uint8_t*)&blocksPackage.data, 2, NUM_FRAME_ADDRESS);
-				sendFeedback(Usart_send_array, 0);
+				EEPROM_Write_Enable();
+				EEPROM_Write_Buffer((uint8_t*)&blocksPackage.data, 2, NUM_FRAME_ADDRESS);
+				sendFeedback(Uart_Send_Array, 0);
 				break;
 			// работа с текстами: textPackage.textnum, textPackage.text
 			case 2:
 				if(numb_of_text < NUMB_OF_TEXT){
-					eeprom_write_enable();
-					eeprom_write_buffer(textPackage.text, MAX_TEXT_SIZE, TEXT_ADDRESS + (numb_of_text * 0x20));
+					EEPROM_Write_Enable();
+					EEPROM_Write_Buffer(textPackage.text, MAX_TEXT_SIZE, TEXT_ADDRESS + (numb_of_text * 0x20));
 					numb_of_text ++;
-					sendFeedback(Usart_send_array, 0);
+					sendFeedback(Uart_Send_Array, 0);
 				}
 				else{
-					sendFeedback(Usart_send_array, 0);
+					sendFeedback(Uart_Send_Array, 0);
 				}
 				break;
 			// работа с блоком speex: speexPackage.data
@@ -110,36 +110,36 @@ void Receiving_Data_Usart(void)
 				address_buf+=20;
 				if(address_buf >= 150){
 					address_buf = 0;
-					eeprom_write_buffer(buf, 160, SPEEX_ADDRESS + address_spx);
+					EEPROM_Write_Buffer(buf, 160, SPEEX_ADDRESS + address_spx);
 					address_spx += 160;
 				}
-				sendFeedback(Usart_send_array, 0);
+				sendFeedback(Uart_Send_Array, 0);
 				break;
 			// работа с обратной связью(сюда придет собщение об окончании связи)
 			case 4:
-				sendFeedback(Usart_send_array, 0);
+				sendFeedback(Uart_Send_Array, 0);
 				break;
 			default:        
-				sendFeedback(Usart_send_array, 1);
+				sendFeedback(Uart_Send_Array, 1);
 				break;
 		}
 	}
-	eeprom_write_enable();
-	eeprom_write_buffer((uint8_t*)&numb_of_text, 2, NUM_TEXT_ADDRESS);
+	EEPROM_Write_Enable();
+	EEPROM_Write_Buffer((uint8_t*)&numb_of_text, 2, NUM_TEXT_ADDRESS);
 }
 
 /*
-*Включение режима запси.
+*Включение режима записи.
 *Запустить можно только при включении платы и зажатой кнопки.
 *После успешного включения будет ждать приема данных по uart
 */
-void wait_data_reception(void)
+void Wait_Data_Reception(void)
 {
 	uint16_t delay = 0;
 	//висим пока нажата кнопка и шлем по юарту фидбэк, чтобы, если комп уже отправлял пакеты, сделал это еще раз
-	while(!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1)){
-		sendFeedback(Usart_send_array, 1);
-		if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)){ //и если комп все же ответил начинаем прием данных
+	while(!GPIO_ReadInputDataBit(BUTTOM_GPIOx, BUTTOM_GPIO_Pin_x)){
+		sendFeedback(Uart_Send_Array, 1);
+		if(USART_GetFlagStatus(SERIAL_USARTx, USART_FLAG_RXNE)){ //и если комп все же ответил начинаем прием данных
 			Receiving_Data_Usart();
 			break;
 		}

@@ -19,16 +19,16 @@ void lcd_page_send(void);
 xSemaphoreHandle xSemaphore_button;
 xSemaphoreHandle xSemaphore_lcd;
 
-uint8_t page1_text1[16] = {0};
-uint8_t page1_text2[16] = {0};
-uint8_t page2_text1[16] = {0};
-uint8_t page2_text2[16] = {0};
-uint8_t page3_text1[16] = {0};
-uint8_t page3_text2[16] = {0};
-uint8_t page4_text1[16] = {0};
-uint8_t page4_text2[16] = {0};
-uint8_t page5_text1[16] = {0};
-uint8_t page5_text2[16] = {0};
+uint8_t page1_text1[20] = {0};
+uint8_t page1_text2[20] = {0};
+uint8_t page2_text1[20] = {0};
+uint8_t page2_text2[20] = {0};
+uint8_t page3_text1[20] = {0};
+uint8_t page3_text2[20] = {0};
+uint8_t page4_text1[20] = {0};
+uint8_t page4_text2[20] = {0};
+uint8_t page5_text1[20] = {0};
+uint8_t page5_text2[20] = {0};
 
 void freertos_init(void){
 	lcd_buffer_filling();
@@ -56,7 +56,7 @@ void ChangeLedMode(void const * argument){
 void StartLCDTask(void const * argument)
 {
 	uint8_t num_page = 0;
-	eeprom_read_buffer( (uint8_t *)&num_page, 32, 0x20);
+	EEPROM_Read_Buffer( (uint8_t *)&num_page, 32, 0x20);
 	num_page = num_page / 2;
 	while(1) {
 		if(xSemaphoreTake(xSemaphore_lcd, portMAX_DELAY)){
@@ -73,27 +73,27 @@ void StartButtonTask(void const * argument)
 {
 	while(1){
 		if(xSemaphoreTake(xSemaphore_button, portMAX_DELAY)){
-			if(AntiContactBounce(GPIOA, GPIO_Pin_1)){
+			if(AntiContactBounce()){
 				int delay = 0;
 				while(!GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) && delay < 1024){
 					if(delay >= 256){
 						if(xSemaphoreTake(xSemaphore_lcd, 0) == pdPASS){
-							LcdClearScreen();
-							LcdCursor(1, 5);
-							LcdPrintStr("Audio");
-							LcdCursor(0, 0);
+							LCD_Clear_Screen();
+							LCD_Set_Cursor(1, 5);
+							LСD_Print_Str("Audio");
+							LCD_Set_Cursor(0, 0);
 							for(int i = 0; i < 4; i++){
-								LcdSendByte(0xFF, 1);
+								LCD_Send_Byte(0xFF, 1);
 							}
 						}
-						else LcdSendByte(0xFF, 1);
+						else LCD_Send_Byte(0xFF, 1);
 					}
 					delay+=64;
 					osDelay(64);
 				}
 				if(delay >= 1024){
 					uint16_t num_of_frame = 0;
-					eeprom_read_buffer( (uint8_t *)&num_of_frame, 32, 0x00);
+					EEPROM_Read_Buffer( (uint8_t *)&num_of_frame, 32, 0x00);
 					lcd_page_send();
 					xSemaphoreGive(xSemaphore_lcd);
 					play_message_from_eeprom(SPEEX_ADDRESS, num_of_frame);
@@ -120,50 +120,50 @@ void StartRGBws2812bTask(void const * argument)
 }
 
 void lcd_buffer_filling(void){
-	eeprom_read_buffer( (uint8_t *)page1_text1, 32, 0x40);
-	eeprom_read_buffer( (uint8_t *)page1_text2, 32, 0x60);
-	eeprom_read_buffer( (uint8_t *)page2_text1, 32, 0x80);
-	eeprom_read_buffer( (uint8_t *)page2_text2, 32, 0xA0);
-	eeprom_read_buffer( (uint8_t *)page3_text1, 32, 0xC0);
-	eeprom_read_buffer( (uint8_t *)page3_text2, 32, 0xE0);
-	eeprom_read_buffer( (uint8_t *)page4_text1, 32, 0x100);
-	eeprom_read_buffer( (uint8_t *)page4_text2, 32, 0x120);
-	eeprom_read_buffer( (uint8_t *)page5_text1, 32, 0x140);
-	eeprom_read_buffer( (uint8_t *)page5_text2, 32, 0x160);
+	EEPROM_Read_Buffer( (uint8_t *)page1_text1, 32, 0x40);
+	EEPROM_Read_Buffer( (uint8_t *)page1_text2, 32, 0x60);
+	EEPROM_Read_Buffer( (uint8_t *)page2_text1, 32, 0x80);
+	EEPROM_Read_Buffer( (uint8_t *)page2_text2, 32, 0xA0);
+	EEPROM_Read_Buffer( (uint8_t *)page3_text1, 32, 0xC0);
+	EEPROM_Read_Buffer( (uint8_t *)page3_text2, 32, 0xE0);
+	EEPROM_Read_Buffer( (uint8_t *)page4_text1, 32, 0x100);
+	EEPROM_Read_Buffer( (uint8_t *)page4_text2, 32, 0x120);
+	EEPROM_Read_Buffer( (uint8_t *)page5_text1, 32, 0x140);
+	EEPROM_Read_Buffer( (uint8_t *)page5_text2, 32, 0x160);
 }
 
 void lcd_page_send(void){
-		LcdClearScreen();
+		LCD_Clear_Screen();
 		switch(page){
 			case 1:
-				LcdCursor(0,(16 - strlen((char *)page1_text1)) / 2);
-				LcdPrintStr((char *) page1_text1);
-				LcdCursor(1,(16 - strlen((char *)page1_text2)) / 2);
-				LcdPrintStr((char *) page1_text2);
+				LCD_Set_Cursor(0,(16 - strlen((char *)page1_text1)) / 2);
+				LСD_Print_Str((char *) page1_text1);
+				LCD_Set_Cursor(1,(16 - strlen((char *)page1_text2)) / 2);
+				LСD_Print_Str((char *) page1_text2);
 				break;
 			case 2:
-				LcdCursor(0,(16 - strlen((char *)page2_text1)) / 2);
-				LcdPrintStr((char *) page2_text1);
-				LcdCursor(1,(16 - strlen((char *)page2_text2)) / 2);
-				LcdPrintStr((char *) page2_text2);
+				LCD_Set_Cursor(0,(16 - strlen((char *)page2_text1)) / 2);
+				LСD_Print_Str((char *) page2_text1);
+				LCD_Set_Cursor(1,(16 - strlen((char *)page2_text2)) / 2);
+				LСD_Print_Str((char *) page2_text2);
 				break;
 			case 3:
-				LcdCursor(0,(16 - strlen((char *)page3_text1)) / 2);
-				LcdPrintStr((char *) page3_text1);
-				LcdCursor(1,(16 - strlen((char *)page3_text2)) / 2);
-				LcdPrintStr((char *) page3_text2);
+				LCD_Set_Cursor(0,(16 - strlen((char *)page3_text1)) / 2);
+				LСD_Print_Str((char *) page3_text1);
+				LCD_Set_Cursor(1,(16 - strlen((char *)page3_text2)) / 2);
+				LСD_Print_Str((char *) page3_text2);
 				break;
 			case 4:
-				LcdCursor(0,(16 - strlen((char *)page4_text1)) / 2);
-				LcdPrintStr((char *) page4_text1);
-				LcdCursor(1,(16 - strlen((char *)page4_text2)) / 2);
-				LcdPrintStr((char *) page4_text2);
+				LCD_Set_Cursor(0,(16 - strlen((char *)page4_text1)) / 2);
+				LСD_Print_Str((char *) page4_text1);
+				LCD_Set_Cursor(1,(16 - strlen((char *)page4_text2)) / 2);
+				LСD_Print_Str((char *) page4_text2);
 				break;
 			case 5:
-				LcdCursor(0,(16 - strlen((char *)page5_text1)) / 2);
-				LcdPrintStr((char *) page5_text1);
-				LcdCursor(1,(16 - strlen((char *)page5_text2)) / 2);
-				LcdPrintStr((char *) page5_text2);
+				LCD_Set_Cursor(0,(16 - strlen((char *)page5_text1)) / 2);
+				LСD_Print_Str((char *) page5_text1);
+				LCD_Set_Cursor(1,(16 - strlen((char *)page5_text2)) / 2);
+				LСD_Print_Str((char *) page5_text2);
 				break;
 		}
 }

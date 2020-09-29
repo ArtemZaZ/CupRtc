@@ -11,11 +11,11 @@ extern uint16_t r2d2_size;
 
 int main(){
 	Delay_Init();
-	Usart_Init();
-	SPIinit();
+	Serial_Init();
+	EEPROM_SPI_Init();
 	InitButtom();
 	
-	wait_data_reception();
+	Wait_Data_Reception();
 	
 	ws2812b_init();
 	Speex_Init();
